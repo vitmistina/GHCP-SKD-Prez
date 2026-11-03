@@ -29,3 +29,9 @@ Three.js 0.170.0 is vendored in `dist/three.module.js`. Caveat and DM Sans fonts
 The animated **Software Crisis (1968)** slide sits immediately after FORTRAN and before the iceberg. Its growing, interconnected paper city illustrates the mismatch between new computing capability and the methods used to manage larger software. Pause growth or replay it from its controls. The tiny engineer deliberately does not scale with the skyline. Reduced-motion settings present a stable finished city.
 
 The on-slide quotation is an exact excerpt from Edsger W. Dijkstra, [*The Humble Programmer* (1972)](https://www.cs.utexas.edu/~EWD/transcriptions/EWD03xx/!SV-EWD340.html). The crisis was discussed at the 1968 NATO conference; Dijkstra's quotation is from **1972**, not 1968. The scene is a metaphor, not a historical simulation or a claim that AI has already caused another crisis.
+
+## Apollo loop
+
+The Apollo scene follows the circular sketch: spacecraft → mission control → crew → DSKY / AGC → spacecraft. Four sequential, visibly different packets carry telemetry, instructions, verb/noun input and control. Pause or advance the signal with the on-slide controls; reduced motion shows stationary packets. The CSM and astronaut are deliberately simplified low-poly models. This is a pedagogical analogy, not a literal flight-control sequence: DSKY is the interface to the AGC, and decisions were distributed.
+
+The photograph of Margaret Hamilton beside her team's Apollo flight software listings (1969) is bundled in `dist/assets/hamilton.jpeg`, from [NASA Science](https://science.nasa.gov/people/margaret-hamilton/). The adjacent procedure card is an illustrative checklist, not an archival flight-plan image. `/scripts` and `skill.md` are contemporary analogies. Both the photo and the scene are embedded in the standalone HTML.
