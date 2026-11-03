@@ -5,6 +5,7 @@ for font in p.glob('font-*.ttf'):css=css.replace(font.name,'data:font/ttf;base64
 js=(p/'app.js').read_text().replace("'./three.module.js'","'data:text/javascript;base64,"+base64.b64encode((p/'three.module.js').read_bytes()).decode()+"'")
 js=js.replace('assets/eniac.jpeg','data:image/jpeg;base64,'+base64.b64encode((p/'assets/eniac.jpeg').read_bytes()).decode())
 js=js.replace('assets/hamilton.jpeg','data:image/jpeg;base64,'+base64.b64encode((p/'assets/hamilton.jpeg').read_bytes()).decode())
+for png in ('sdk-agent-window.png','sdk-harness-picker.png','sdk-copilot-app.png'):js=js.replace('assets/'+png,'data:image/png;base64,'+base64.b64encode((p/'assets'/png).read_bytes()).decode())
 html=html.replace('<link rel="stylesheet" href="style.css">','<style>'+css+'</style>').replace('<script type="module" src="app.js"></script>','<script type="module">'+js+'</script>')
 html=re.sub(r'<a href="presentation.html".*?</a>','',html)
 (p/'presentation.html').write_text(html)

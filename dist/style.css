@@ -129,3 +129,22 @@ body[data-scene="lessons"] #sceneLabel{right:19%;bottom:13%}
  body[data-scene="lessons"] h1{font-size:50px}
  body[data-scene="lessons"] #trade{margin-top:14px}
 }
+/* Places: the user's annotated screenshots, pinned as paper photo cards. Images are shown unmodified, at their own aspect ratio. */
+#places{position:fixed;inset:0;z-index:2;pointer-events:none}#places:empty{display:none}
+body[data-scene="places"] #world{pointer-events:none}body[data-scene="places"] #sceneLabel small{display:none}
+@media(min-width:801px){body[data-scene="places"] #annotation{top:11%;right:5%}}
+.place-card{position:absolute;margin:0;padding:10px 10px 12px;background:#fffaf0;box-shadow:0 1px 2px #30372e24,0 16px 32px -12px #30372e55;transform:rotate(var(--tilt));pointer-events:auto;transition:transform .35s ease,box-shadow .35s ease}
+.place-card:hover{z-index:3;transform:rotate(calc(var(--tilt)*.3)) translateY(-5px);box-shadow:0 1px 2px #30372e24,0 24px 40px -14px #30372e66}
+.place-card:before{content:'';position:absolute;top:-12px;left:50%;width:96px;height:25px;margin-left:-48px;background:var(--tape);opacity:.72;transform:rotate(-4deg);box-shadow:0 1px 2px #30372e1a}
+.place-card img{display:block;width:100%;height:auto;border:1px solid #30372e1c}
+.place-card figcaption{display:flex;align-items:center;justify-content:space-between;gap:4px 12px;flex-wrap:wrap;margin-top:7px}
+.place-card b{font:500 30px/1 Caveat,'Comic Sans MS',cursive;white-space:nowrap}.place-card b i{font-style:normal;font-size:1.35em;color:var(--orange)}
+.place-card span{font-size:12px;color:var(--muted)}
+.place-1{left:42vw;top:11.5vh;width:22vw;--tilt:-2.4deg;--tape:var(--gold);--delay:.05s}
+.place-2{right:2.5vw;top:28vh;width:28vw;--tilt:1.8deg;--tape:var(--blue);--delay:.2s}
+.place-3{left:44vw;top:45vh;width:min(21.5vw,calc((55vh - 158px)/.98));--tilt:-1.2deg;--tape:var(--green);--delay:.35s}
+.place-card.pending{background:#f3eee2}.place-card.pending img{filter:saturate(.68) contrast(.93) brightness(1.03)}.place-card.pending b{color:#5f6259}
+.place-card .stamp{font:700 10px/1.2 'DM Sans',sans-serif;letter-spacing:1px;color:var(--orange);border:2px solid var(--orange);border-radius:3px;padding:5px 7px;transform:rotate(-6deg);background:#fffaf0aa;white-space:nowrap}
+@media(prefers-reduced-motion:no-preference){.place-card{animation:place-pin .7s cubic-bezier(.2,.8,.3,1.15) var(--delay) backwards}}
+@keyframes place-pin{from{opacity:0;transform:translateY(22px) rotate(calc(var(--tilt)*3)) scale(.96)}}
+@media(max-width:800px){#places{inset:12% 4% auto;height:42%;display:flex;gap:3%;align-items:center;justify-content:center}.place-card{position:relative;left:auto;right:auto;top:auto;width:31%;padding:5px 5px 6px}.place-card b{font-size:17px}.place-card span{font-size:9px}.place-card .stamp{font-size:7px;padding:3px 4px;letter-spacing:.8px}.place-card:before{width:44px;height:12px;margin-left:-22px;top:-6px}}
