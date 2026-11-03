@@ -1,1 +1,25 @@
-# GHCP-SKD-Prez
+# GHCP SDK presentation
+
+Canonical source for Vít Miština’s illustrated 3D presentation, **Climbing the delegation staircase**.
+
+## Open and edit
+
+- Download `dist/presentation.html` and open it directly in a browser. It includes the JavaScript, fonts and historical photograph and needs no network connection.
+- For development, run `python3 -m http.server 8080 --directory dist`, then open `http://localhost:8080`.
+- Edit `dist/app.js` for slide copy, speaker notes, 3D models and interaction. Edit `dist/style.css` for layout and `dist/index.html` for the shell.
+- Run `python3 build-single.py` after edits to regenerate the standalone HTML. Commit both the editable source and regenerated HTML.
+- JavaScript syntax check: `node --input-type=module --check < dist/app.js`.
+
+## Controls
+
+Arrow keys / Space: navigate. M: chapter map. N: speaker notes. F: full screen. Drag the illustration to rotate it.
+
+The introduction has a slow continuous escalator with a pause button. ENIAC is projected on a cinema screen with animated reels and a pause control. Reduced-motion preferences disable these animations. WebGL rendering uses Three.js; a Canvas 2D projection of the same scene is available when WebGL is unavailable.
+
+The MAF workflow is an illustrative simulation, not a live integration. The practical-findings slide is a draft for the presenter’s observations.
+
+## Assets
+
+`dist/assets/eniac.jpeg` is the unchanged historical photograph extracted from the previous `copilot-sdk-story-v2-visual.pptx`. Its recorded source is [The Army at 250: Did you know the Army invented this?](https://www.army.mil/article/283485/the_army_at_250_did_you_know_the_army_invented_this). It is displayed at its original aspect ratio.
+
+Three.js 0.170.0 is vendored in `dist/three.module.js`. Caveat and DM Sans fonts are bundled locally. The standalone HTML embeds these dependencies, including the ENIAC photo.
