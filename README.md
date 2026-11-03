@@ -23,3 +23,9 @@ The MAF workflow is an illustrative simulation, not a live integration. The prac
 `dist/assets/eniac.jpeg` is the unchanged historical photograph extracted from the previous `copilot-sdk-story-v2-visual.pptx`. Its recorded source is [The Army at 250: Did you know the Army invented this?](https://www.army.mil/article/283485/the_army_at_250_did_you_know_the_army_invented_this). It is displayed at its original aspect ratio.
 
 Three.js 0.170.0 is vendored in `dist/three.module.js`. Caveat and DM Sans fonts are bundled locally. The standalone HTML embeds these dependencies, including the ENIAC photo.
+
+## Software crisis scene
+
+The animated **Software Crisis (1968)** slide sits immediately after FORTRAN and before the iceberg. Its growing, interconnected paper city illustrates the mismatch between new computing capability and the methods used to manage larger software. Pause growth or replay it from its controls. The tiny engineer deliberately does not scale with the skyline. Reduced-motion settings present a stable finished city.
+
+The on-slide quotation is an exact excerpt from Edsger W. Dijkstra, [*The Humble Programmer* (1972)](https://www.cs.utexas.edu/~EWD/transcriptions/EWD03xx/!SV-EWD340.html). The crisis was discussed at the 1968 NATO conference; Dijkstra's quotation is from **1972**, not 1968. The scene is a metaphor, not a historical simulation or a claim that AI has already caused another crisis.
