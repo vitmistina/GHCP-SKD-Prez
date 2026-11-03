@@ -187,6 +187,37 @@ const apolloSignals=[
  ['TOOL USE','VERB / NOUN','Crew → DSKY: enter a verb and noun to interact with the guidance computer.'],
  ['CONTROL','GUIDANCE → ACTUATION','Guidance computer → spacecraft: execute control; observe the changed state.']
 ];
+
+// Block II DSKY proportions and panel hierarchy; displayed values are illustrative.
+function buildDSKY(parent){
+ const w=1.42,h=1.58;
+ box(w,h,.24,0xa8ada6,0,0,0,parent);
+ box(w-.1,h-.1,.03,0xc6c9bf,0,0,.135,parent);
+ const c=document.createElement('canvas');c.width=900;c.height=1000;
+ const ctx=c.getContext('2d');ctx.fillStyle='#aeb3aa';ctx.fillRect(0,0,900,1000);
+ const label=(s,x,y,size=22,color='#d8dfc9')=>{ctx.fillStyle=color;ctx.font=`bold ${size}px monospace`;ctx.textAlign='center';ctx.fillText(s,x,y)};
+ // Separate annunciators and electroluminescent readout, with raised surrounds.
+ ctx.fillStyle='#747b73';ctx.fillRect(35,36,355,550);ctx.fillRect(410,36,455,550);
+ ctx.fillStyle='#172b25';ctx.fillRect(425,51,425,520);
+ const lamps=[['UPLINK','ACTY'],['TEMP'],['NO','ATT'],['GIMBAL','LOCK'],['STBY'],['PROG'],['KEY','REL'],['RESTART'],['OPR','ERR'],['TRACKER']];
+ lamps.forEach((ls,i)=>{const x=49+(i%2)*169,y=53+Math.floor(i/2)*101;ctx.fillStyle=i%2?'#b2aa76':'#d1d3bf';ctx.fillRect(x,y,153,85);ls.forEach((v,j)=>label(v,x+76,y+(ls.length===1?51:33+j*29),23,'#373d35'));});
+ label('COMP',490,91,20);label('ACTY',490,119,20);label('PROG',745,82);label('VERB',520,191);label('NOUN',747,191);
+ const digits=(str,x,y,scale=1)=>{
+ const segs={0:'ab cdef'.replaceAll(' ',''),1:'bc',2:'abdeg',3:'abcdg',4:'bcfg',5:'acdfg',6:'acdefg',7:'abc',8:'abcdefg',9:'abcdfg'};
+ const paths={a:[4,0,24,4],b:[28,4,4,25],c:[28,34,4,25],d:[4,59,24,4],e:[0,34,4,25],f:[0,4,4,25],g:[4,29,24,4]};
+ ctx.save();ctx.translate(x,y);ctx.scale(scale,scale);
+ [...str].forEach((ch,i)=>{const ox=i*43;ctx.fillStyle='#9de6ad';if(ch==='+'||ch==='-'){ctx.fillRect(ox+5,29,23,4);if(ch==='+')ctx.fillRect(ox+15,19,4,24);}else for(const k of segs[ch]||''){const [a,b,w,h]=paths[k];ctx.fillRect(ox+a,b,w,h);}});ctx.restore();
+ };
+ digits('00',706,94,1.25);digits('16',477,205,1.25);digits('62',705,205,1.25);
+ ['+00000','+00000','-00000'].forEach((v,i)=>{ctx.fillStyle='#9de6ad';ctx.fillRect(445,306+i*85,382,3);digits(v,468,320+i*85,1.18)});
+ // Nineteen keys: numeric columns plus the original verb/noun and control keys.
+ const rows=[['VERB','+','7','8','9','CLR',null],['NOUN','−','4','5','6','PRO','ENTR'],[null,'0','1','2','3','KEY REL','RSET']];
+ rows.forEach((row,j)=>row.forEach((v,i)=>{if(!v)return;const x=31+i*121,y=650+j*105;ctx.fillStyle='#646e68';ctx.fillRect(x-3,y-3,112,94);ctx.fillStyle='#263c37';ctx.fillRect(x,y,105,85);v.split(' ').forEach((t,k,arr)=>label(t,x+52,y+(arr.length===1?53:35+k*27),v.length>3?21:32,'#edf0dc'));}));
+ for(const x of [17,883])for(const y of [18,980]){ctx.fillStyle='#6b726b';ctx.beginPath();ctx.arc(x,y,8,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#dce0d3';ctx.beginPath();ctx.moveTo(x-5,y);ctx.lineTo(x+5,y);ctx.stroke();}
+ const tex=new THREE.CanvasTexture(c);tex.colorSpace=THREE.SRGBColorSpace;
+ const face=new THREE.Mesh(new THREE.PlaneGeometry(w-.14,h-.14),new THREE.MeshBasicMaterial({map:tex}));face.position.z=.158;face.userData.photo={image:c,w:w-.14,h:h-.14};parent.add(face);
+}
+
 function buildApollo(){
  apolloClock=0;apolloPaused=false;apolloStage=-1;apolloRoutes=[];apolloPackets=[];
  const station=(x,y)=>{const g=new THREE.Group();g.position.set(x,y,0);root.add(g);return g};
@@ -213,10 +244,8 @@ function buildApollo(){
  box(.28,.18,.38,paper,side*.18,-.91,.09,crew);
  box(.28,.065,.035,orange,side*.18,-.63,.14,crew);
  }
- box(1.28,.94,.26,0xa8b0a7,0,0,0,dsky);box(.99,.38,.03,ink,0,.18,.15,dsky);
- for(let j=0;j<3;j++)for(let i=0;i<7;i++)box(.072,.025,.02,green,-.36+i*.12,.28-j*.1,.18,dsky);
- for(let j=0;j<3;j++)for(let i=0;i<5;i++)box(.15,.1,.04,paper,-.4+i*.2,-.12-j*.13,.17,dsky);
- textSprite('mission control',0,2.78,0,.34);textSprite('spacecraft',-2.35,-.85,0,.34);textSprite('crew / agent',2.35,-1.3,0,.34);textSprite('DSKY → AGC',0,-2.65,0,.34);
+ buildDSKY(dsky);
+ textSprite('mission control',0,2.78,0,.34);textSprite('spacecraft',-2.35,-.85,0,.34);textSprite('crew / agent',2.35,-1.3,0,.34);textSprite('DSKY → AGC',0,-2.96,0,.3);
  const routes=[ [[-2.34,.62,0],[-2.1,1.8,0],[-.95,2.3,0]], [[.85,2.15,0],[2.05,1.85,0],[2.35,.98,0]], [[2.1,-1.05,0],[1.55,-2.12,0],[.88,-2.05,0]], [[-.87,-2.0,0],[-2.1,-1.8,0],[-2.45,-.64,0]] ];
  routes.forEach((pts,i)=>{
  const curve=new THREE.QuadraticBezierCurve3(...pts.map(p=>new THREE.Vector3(...p)));apolloRoutes.push(curve);
