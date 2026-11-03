@@ -59,3 +59,14 @@
 @media(max-width:800px) and (max-height:740px){#world{height:44%;top:9%}main{top:46%}h1{font-size:35px;margin-bottom:8px}#description{font-size:12px}#trade{margin-top:10px;gap:5px}.tradeRow{font-size:10px}#sceneLabel{top:36%}#annotation{top:16%}header{padding-top:12px}#interactive button{padding:6px 10px}}
 .tools a{font-size:12px;padding:9px 13px;text-decoration:none;color:var(--ink);border:1px solid #343a3333;border-radius:50px}
 @media(min-width:801px){body[data-scene="eniac"] #sceneLabel{right:37%;bottom:17%;text-align:left}body[data-scene="eniac"] #annotation{top:13%;right:9%}}
+
+/* Historical software crisis: a restrained, citation-first quote beside an exuberant 3D scene. */
+body[data-scene="crisis"] #trade{margin-top:29px;max-width:410px}
+.crisis-quote{margin:0;padding:18px 0 0;border-top:2px solid #d8623e;position:relative}
+.crisis-quote:before{content:'“';position:absolute;top:1px;left:-12px;color:#d8623e66;font:78px Caveat,cursive}
+.crisis-quote blockquote{font:500 clamp(24px,2.2vw,35px)/1.06 Caveat,cursive;margin:0 0 16px;color:#30372e;transform:rotate(-1.1deg)}
+.crisis-quote figcaption{font:700 9px/1.7 'DM Sans',sans-serif;letter-spacing:1.1px;color:#74766b}
+.crisis-quote a{color:#bd5e3b;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
+body[data-scene="crisis"] #annotation{right:8%;top:17%;color:#bd5e3b}
+@media(max-width:800px){body[data-scene="crisis"] #trade{margin-top:15px}.crisis-quote{padding-top:10px}.crisis-quote blockquote{font-size:21px;line-height:1.08;margin-bottom:10px}.crisis-quote figcaption{font-size:8px;letter-spacing:.5px}body[data-scene="crisis"] #annotation{top:14%;right:6%;font-size:15px}}
+@media(max-width:800px) and (max-height:740px){body[data-scene="crisis"] #trade{margin-top:10px}.crisis-quote blockquote{font-size:18px}}
