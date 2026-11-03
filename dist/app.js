@@ -11,7 +11,7 @@ const slides=[
 {tag:'07 / THE LANGUAGE MODEL',title:'We can describe<br><em>the outcome.</em>',desc:'A model can interpret a request and propose a path. But a plausible answer is not yet completed work.',gain:'Drafting and interpreting less formal instructions.',cost:'Context, ambiguity and checking the result.',scene:'brain',label:'a powerful engine, on its own',annotation:'An answer is not<br>an outcome.',section:'The new step',note:'Do not frame this as guaranteed reasoning. The important distinction is between generating a response and completing a verified task.'},
 {tag:'08 / THE AGENT HARNESS',title:'Give the model<br><em>a working loop.</em>',desc:'The harness brings context, tools, permissions and feedback together. The agent can act, inspect what happened and try again.',gain:'Multi-step execution inside an environment.',cost:'Boundaries, evidence and a definition of done.',scene:'harness',label:'observe → act → check → repeat',annotation:'Not just a prompt.<br>A working system.',section:'The new step',note:'Explain what is already inside the harness. Separate the agent loop from the outer business workflow. Click the loop button to illustrate tool use and feedback.'},
 {tag:'09 / THE SDK · THE CENTRAL IDEA',title:'Now the harness<br>is <em>callable.</em>',desc:'The agent you direct by hand becomes a component your application can invoke, observe and coordinate.',gain:'Programmatic access to an agent runtime.',cost:'Integration, lifecycle and responsibility for the outcome.',scene:'sdk',label:'your application → SDK → CLI runtime',annotation:'A building block.<br>Not just a chat box.',section:'Architecture',note:'The SDK communicates with the Copilot CLI runtime over JSON-RPC. A C# app is one client. VS Code uses an Agent Host and adapter, not the exact same client path.'},
-{tag:'10 / TWO WAYS IN',title:'One capability.<br><em>Different controls.</em>',desc:'Your code can call the SDK. In VS Code, the Agent Host connects the interface to the Copilot harness.',scene:'architecture',label:'click a layer to inspect it',annotation:'UI ≠ SDK<br>≠ orchestration',section:'Architecture',note:'Use the buttons to show the two entry paths. MAF is optional orchestration above a provider; it is not required for the SDK. Sources: github.com/github/copilot-sdk and code.visualstudio.com/blogs/2026/08/26/agent-host-architecture.'},
+{tag:'10 / ONE AGENT, MANY PLUGS',title:'One agent.<br><em>Many plugs.</em>',desc:'The Copilot CLI is a general-purpose agent: it uses the terminal, the file system and writes its own scripts. The SDK is the power strip — plug in any experience you want to build.',scene:'powerstrip',label:'CLI runtime → SDK → your experience',annotation:'One agent.<br>Plug it in anywhere.',section:'Architecture',note:'You can talk to the CLI directly in the terminal. Through the SDK (JSON-RPC to the CLI runtime) the same agent powers your own C#/Python program, the VS Code Agent window and the Copilot App. The empty socket is the invitation: what would you plug in? Sources: github.com/github/copilot-sdk.'},
 {tag:'11 / MICROSOFT AGENT FRAMEWORK',title:'Delegate work.<br><em>Keep the gates.</em>',desc:'A small workflow: assign a change, let the agent work, run a check, then accept or return it for repair.',scene:'workflow',label:'an illustrative workflow — not a live agent',annotation:'Evidence before<br>“done”.',section:'The demonstration',note:'This is an explanatory simulation, not a connected Copilot run. Replace or follow it with your live MAF demo. Use the failure switch to show why feedback and stopping conditions matter.'},
 {tag:'12 / LESSONS FROM THE FIELD',title:'Context was<br><em>already there.</em>',desc:'Memory, preferences and user instructions carried over from the VS Code experience.',scene:'lessons',label:'01 / context survives the move',annotation:'Less setup<br>than expected.',section:'Practical findings',note:'Personal experiment: existing memory, preferences and user instructions worked with the SDK. Do not promise identical loading behavior for every SDK release or session type. This scene has five presenter-controlled lessons.'},
 {tag:'13 / WHERE TO USE IT',title:'Start with a task<br>you can <em>check.</em>',desc:'Good experiments have a clear boundary, accessible tools and visible evidence of completion.',scene:'ideas',label:'choose an experiment',annotation:'Small scope.<br>Strong feedback.',section:'Next experiments',note:'These are candidate experiments, not implemented integrations. Keep the first experiment small enough that you know what success means.'},
@@ -403,6 +403,92 @@ function showLesson(n){
  const next=button('Next lesson →',()=>showLesson(lessonStep+1),true);next.disabled=lessonStep===lessonBeats.length-1;
  build('lessons');
 }
+let powerClock=0,powerBolts=[],powerScreens=[],powerGhost=null;
+const powerLoop=5.4,powerStarts=[1.05,1.78,2.51,3.24],powerTravel=1.1;
+function buildPowerStrip(){
+ powerClock=0;powerBolts=[];powerScreens=[];
+ const curve=pts=>new THREE.CatmullRomCurve3(pts.map(p=>new THREE.Vector3(...p)),false,'centripetal');
+ const cable=(pts,radius,color,opacity=1,dashed=false)=>{
+  const path=curve(pts);
+  if(dashed){const geo=new THREE.BufferGeometry().setFromPoints(path.getPoints(72));const mat=new THREE.LineDashedMaterial({color,dashSize:.14,gapSize:.12,transparent:true,opacity});const wire=new THREE.Line(geo,mat);wire.computeLineDistances();root.add(wire);}
+  else{const geo=new THREE.TubeGeometry(path,42,radius,5,false);root.add(new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color,roughness:.96,flatShading:true,transparent:opacity<1,opacity})));}
+  return path;
+ };
+ const bolt=()=>{const group=new THREE.Group(),shape=new THREE.Shape();shape.moveTo(-.075,.17);shape.lineTo(.11,.17);shape.lineTo(.015,-.005);shape.lineTo(.095,-.005);shape.lineTo(-.12,-.19);shape.lineTo(-.045,-.045);shape.lineTo(-.14,-.045);shape.closePath();const body=mesh(new THREE.ExtrudeGeometry(shape,{depth:.07,steps:1,bevelEnabled:false}),gold,0,0,.04,group);body.material.emissive.setHex(0x765417);body.material.emissiveIntensity=.72;const spark=ball(.06,gold,.045,.15,.1,group);spark.material.emissive.setHex(0x8c6720);spark.material.emissiveIntensity=.65;group.scale.setScalar(1.12);root.add(group);return group;};
+ const badge=(label,y,color)=>{box(1.02,.27,.15,color,-3.12,y,.05);textSprite(label,-3.12,y-.005,.14,.18,ink)};
+ badge('terminal',1.45,blue);badge('files',1.12,green);badge('scripts',.79,gold);
+ box(1.28,.9,.42,0xb6b8aa,-3.12,-.2,0);
+ box(1.12,.66,.035,paper,-3.12,-.19,.23);
+ box(1.01,.53,.025,ink,-3.12,-.18,.255);
+ box(1.01,.075,.025,blue,-3.12,.055,.275);
+ for(let i=0;i<4;i++){const code=box(.28+(i%2)*.12,.035,.018,[green,gold,blue,paper][i],-3.4+(i%2)*.1,-.08-i*.1,.29);code.rotation.z=i%2?-.08:.03;}
+ textSprite('Copilot CLI',-3.12,-.82,.12,.34);
+ textSprite('AGENT RUNTIME',-3.12,-1.08,.12,.2,'#74766b');
+ const inlet=cable([[-2.48,-.2,.28],[-2.02,-.18,.34],[-1.45,.02,.34],[-.88,.02,.34]],.105,0x727c70);
+ box(.86,2.9,.35,0xb7c4b8,-.45,0,0);
+ box(.75,2.78,.045,paper,-.45,0,.2);
+ box(.52,.12,.025,ink,-.45,1.24,.24);
+ textSprite('GitHub Copilot SDK',-.45,1.66,.25,.32);
+ const ys=[1.02,.34,-.34,-1.02];
+ ys.forEach((y,i)=>{
+  mesh(new THREE.CircleGeometry(.2,8),0x454c42,-.45,y,.235,root);
+  box(.035,.09,.018,gold,-.51,y,.255);
+  box(.035,.09,.018,gold,-.39,y,.255);
+  const colors=[blue,gold,green,0x9a9b91];
+  const plug=new THREE.Group();plug.position.set(-.26,y,.28);root.add(plug);
+  box(.34,.2,.17,colors[i],.16,0,0,plug);
+  box(.06,.065,.065,0xe7e2d4,.34,.055,.015,plug);
+  box(.06,.065,.065,0xe7e2d4,.34,-.055,.015,plug);
+  if(i===3)plug.traverse(o=>{if(o.material){o.material.transparent=true;o.material.opacity=.24;o.material.depthWrite=false}});
+ });
+ box(1.42,.76,.2,paper,2.25,1.64,0);
+ const programScreen=box(1.28,.59,.035,ink,2.25,1.64,.12);
+ box(1.28,.075,.02,blue,2.25,1.895,.15);
+ for(let i=0;i<4;i++)box(.36+(i%2)*.13,.035,.018,[green,gold,blue,paper][i],1.88+(i%2)*.09,1.76-i*.1,.17);
+ textSprite('Your program',2.25,2.15,.2,.31);
+ textSprite('C# · Python',2.25,1.12,.2,.25,'#74766b');
+ const monitor=box(1.38,.77,.2,0x777e70,2.25,.35,0);
+ const monitorScreen=box(1.23,.6,.035,0x28352f,2.25,.37,.12);
+ box(1.38,.09,.24,ink,2.25,-.09,0);box(.13,.25,.1,ink,2.25,-.25,0);
+ box(.55,.075,.28,ink,2.25,-.41,0);
+ for(let i=0;i<3;i++)box(.57-i*.1,.035,.015,[blue,gold,green][i],2.08,.52-i*.12,.15);
+ textSprite('VS Code Agent',2.25,.91,.2,.3);
+ const app=box(.98,.68,.19,ink,2.25,-.91,0);
+ const appScreen=box(.84,.53,.035,paper,2.25,-.91,.115);
+ box(.19,.19,.025,green,2.25,-.91,.14);
+ box(.07,.07,.02,gold,2.25,-.91,.16);
+ textSprite('Copilot App',2.25,-1.42,.2,.29);
+ powerScreens=[{material:programScreen.material,base:programScreen.material.color.clone(),glow:new THREE.Color(0xe2d6a5),arrival:powerStarts[0]+powerTravel},{material:monitorScreen.material,base:monitorScreen.material.color.clone(),glow:new THREE.Color(0xbfd5dc),arrival:powerStarts[1]+powerTravel},{material:appScreen.material,base:appScreen.material.color.clone(),glow:new THREE.Color(0xc3d1ad),arrival:powerStarts[2]+powerTravel}];
+ const outputs=[
+  cable([[.22,1.02,.37],[.62,1.08,.3],[1.02,1.42,.22],[1.53,1.64,.16]],.047,0x8ca7a9),
+  cable([[.22,.34,.37],[.64,.21,.3],[1.04,.43,.22],[1.55,.35,.16]],.047,0xb79a4d),
+  cable([[.22,-.34,.37],[.62,-.52,.3],[1.05,-.91,.22],[1.74,-.91,.16]],.047,0x9aa985),
+  cable([[.22,-1.02,.37],[.58,-1.34,.3],[1.05,-1.63,.23],[2.05,-1.74,.17]],.035,0x92958a,.42,true)
+ ];
+ powerBolts.push({route:inlet,object:bolt(),input:true,index:0});
+ outputs.forEach((route,i)=>powerBolts.push({route,object:bolt(),input:false,index:i}));
+ const flicker=ball(.055,gold,-.53,ys[3],.34);flicker.material.emissive.setHex(0x765417);flicker.material.emissiveIntensity=.55;flicker.material.transparent=true;flicker.material.opacity=.25;powerGhost=flicker.material;
+ const person=new THREE.Group();person.position.set(3.55,-.04,0);root.add(person);
+ mesh(new THREE.SphereGeometry(.17,8,6),paper,0,.57,0,person);
+ mesh(new THREE.CylinderGeometry(.11,.15,.43,7),blue,0,.22,0,person);
+ for(const side of [-1,1]){const arm=box(.075,.36,.08,ink,side*.18,.24,0,person);arm.rotation.z=side*.28;const leg=box(.09,.42,.1,ink,side*.08,-.2,0,person);leg.rotation.z=side*.08;box(.2,.07,.17,paper,side*.08,-.43,.04,person);}
+ textSprite('your idea here?',-1.55,-1.62,.32,.3);
+ root.position.x=.6;
+ animatePowerStrip(0,0);
+}
+function animatePowerStrip(now,dt){
+ if(!powerBolts.length)return;
+ if(!reduced)powerClock=(powerClock+Math.max(0,dt))%powerLoop;
+ powerBolts.forEach(b=>{
+  let t=.5,active=true;
+  if(!reduced){if(b.input){active=powerClock<.92;t=Math.max(0,Math.min(1,powerClock/.92));}else{const elapsed=(powerClock-powerStarts[b.index]+powerLoop)%powerLoop;active=elapsed<powerTravel;t=Math.max(0,Math.min(1,elapsed/powerTravel));}}
+  b.object.visible=active||reduced;
+  b.object.position.copy(b.route.getPointAt(reduced?.52:t));
+  b.object.rotation.set(reduced?0:Math.sin(now*.0017+b.index)*.11,reduced?0:Math.cos(now*.0015+b.index)*.12,reduced?0:Math.sin(now*.002+b.index*1.7)*.12);
+ });
+ powerScreens.forEach(s=>{const since=(powerClock-s.arrival+powerLoop)%powerLoop,pulse=reduced?0:since<.48?1-since/.48:0;s.material.color.copy(s.base).lerp(s.glow,pulse*.65);s.material.emissive.setHex(0x304027);s.material.emissiveIntensity=.04+pulse*.72;});
+ if(powerGhost)powerGhost.opacity=reduced?.25:.12+Math.max(0,Math.sin(now*.0018+1.1))**2*.34;
+}
 
 function build(type){if(!scene)return;if(root){scene.remove(root);root.traverse(o=>{o.geometry?.dispose();if(o.material){o.material.map?.dispose();o.material.dispose()}})}root=new THREE.Group();scene.add(root);objects=[];escalatorSteps=[];cinemaReels=[];cinemaBeam=null;rng=19;spin=targetSpin=0;tilt=targetTilt=0;transition=0;sim=0;auto=false;
 if(type==='stairs')stairs();
@@ -411,6 +497,7 @@ if(type==='crisis'){crisisBuildings=[];crisisLinks=[];crisisSparks=[];crisisCloc
 if(type==='compiler'){platform();for(let i=0;i<3;i++){box(2.8,.18,1.8,[blue,gold,paper][i],0,i*.9-.8,0);textSprite(['0101 1100 0010','COMPILE','DO I = 1, N'][i],0,i*.9-.5,1,.5)}arrow([1.9,1.1,0],[1.9,-.8,0],orange)}
 if(type==='iceberg'){mesh(new THREE.ConeGeometry(1,1.8,5),paper,0,.65,0);const low=mesh(new THREE.ConeGeometry(2.1,3.3,6),blue,0,-1.8,0);low.rotation.z=Math.PI;const water=mesh(new THREE.CircleGeometry(3.5,60),blue,0,-.2,0);water.rotation.x=-Math.PI/2;water.material.transparent=true;water.material.opacity=.35;water.material.depthWrite=false;textSprite('the interface',1.65,1.15,0,.38);textSprite('the system',1.65,-1.5,1,.4);line([[-3,-.18,.5],[-2,-.12,.5],[-1,-.22,.5],[0,-.13,.5],[1,-.23,.5],[2,-.12,.5],[3,-.18,.5]])}
 if(type==='apollo')buildApollo();
+if(type==='powerstrip')buildPowerStrip();
 if(type==='layers'){for(let i=0;i<3;i++){const b=box(3.2,.5,2,[blue,green,gold][i],(i-1)*.25,(i-1)*1.05,0);b.rotation.y=(i-1)*.08;textSprite(['memory / GC','objects / boundaries','RPC / networks'][i],0,(i-1)*1.05+.1,1.2,.42)}arrow([2.3,-1,0],[2.3,1.5,0],orange)}
 if(type==='brain'){for(let i=0;i<20;i++){const a=i*2.39996;const yy=1-2*i/20;const r=Math.sqrt(1-yy*yy);const pos=[r*Math.cos(a)*1.6,yy*1.5,r*Math.sin(a)*1.3];objects.push(ball(.24,i%3?blue:gold,...pos));if(i>0)line([[0,0,0],pos],0x999e8c)}ball(.7,paper);textSprite('“make this work”',0,2.2,0,.6)}
 if(type==='harness'){ball(.72,gold,0,0,0);textSprite('model',0,.05,1,.45);['context','tools','permissions','feedback'].forEach((t,i)=>{let a=i*Math.PI/2;let x=Math.cos(a)*2.1,y=Math.sin(a)*1.6;box(1.25,.65,.6,[blue,green,paper,orange][i],x,y,0);textSprite(t,x,y+.12,.5,.36);arrow([x*.65,y*.65,0],[x*.42,y*.42,0])});const pts=[];for(let i=0;i<=80;i++){const a=i/80*Math.PI*2;pts.push([Math.cos(a)*2.65,Math.sin(a)*2.05,-.4])}line(pts,0xaaa78d);objects.push(ball(.13,orange,2.65,0,-.4))}
@@ -468,4 +555,5 @@ update();document.fonts.ready.then(()=>build(slides[index].scene));let escalator
 if(slides[index].scene==='crisis')animateCrisis(now,dt);
 if(slides[index].scene==='apollo')animateApollo(dt);
  if(slides[index].scene==='lessons')animateLessons(dt);
+if(slides[index].scene==='powerstrip')animatePowerStrip(now,dt);
 if(slides[index].scene==='harness'&&auto&&objects[0]){const a=now*.001;objects[0].position.set(Math.cos(a)*2.65,Math.sin(a)*2.05,-.4)}if(slides[index].scene==='brain'&&!reduced)objects.forEach((o,i)=>o.scale.setScalar(1+Math.sin(now*.001+i)*.1));if(slides[index].scene==='eniac'&&!reduced)objects.forEach((o,i)=>o.material.emissive.setHex(Math.sin(now*.002+i)> .8?0x443300:0));if(slides[index].scene==='workflow'&&sim){let stage=Math.floor((now-simStart)/1200);const seq=fail?[0,1,2,3,1,2,3]:[0,1,2,3];const msgs=fail?['Assigning a bounded change','Agent edits the workspace','Check failed: evidence returned','Repair requested · attempt 2 of 2','Agent applies a repair','Check passes','Accepted with evidence']:['Assigning a bounded change','Agent edits the workspace','Check passes','Accepted with evidence'];if(stage<seq.length){objects.forEach((o,i)=>o.scale.setScalar(i===seq[stage]?1.1:1));if(simStatus!==msgs[stage]){$('drawingTitle').textContent=msgs[stage];simStatus=msgs[stage]}}else{sim=0;objects.forEach(o=>o.scale.setScalar(1));$('drawingTitle').textContent='Done. Outcome checked, not merely asserted.'}}renderer.render(scene,camera)}requestAnimationFrame(frame);
