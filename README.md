@@ -16,7 +16,7 @@ Arrow keys / Space: navigate. M: chapter map. N: speaker notes. F: full screen. 
 
 The introduction has a slow continuous escalator with a pause button. ENIAC is projected on a cinema screen with animated reels and a pause control. Reduced-motion preferences disable these animations. WebGL rendering uses Three.js; a Canvas 2D projection of the same scene is available when WebGL is unavailable.
 
-The MAF workflow is an illustrative simulation, not a live integration. The interactive field-notes slide replaces the former practical-findings placeholder. It contains five presenter-controlled miniature 3D scenes: context inheritance; explicit subagent roles; Copilot helping to build its own SDK workflow; heartbeat versus real progress; and the coordination bottleneck created by too many agents. On this slide, the arrow keys and footer arrows step through the five lessons before moving to the next slide. This is a qualitative illustration, not a benchmark. The notes panel (N) contains presenter context for each lesson.
+The MAF workflow is an illustrative simulation, not a live integration. The interactive field-notes slide replaces the former practical-findings placeholder. It contains five presenter-controlled miniature 3D scenes: manual context migration; explicit subagent roles; Copilot helping to build its own SDK workflow; heartbeat versus real progress; and the coordination bottleneck created by too many agents. On this slide, the arrow keys and footer arrows step through the five lessons before moving to the next slide. This is a qualitative illustration, not a benchmark. The notes panel (N) contains presenter context for each lesson.
 
 ## Assets
 
