@@ -182,3 +182,35 @@ body[data-scene="wardley"] #trade{max-width:405px;margin-top:24px}
  body[data-scene="wardley"] main{top:49%;padding-bottom:90px}
  body[data-scene="wardley"] #sceneLabel{top:40%}
 }
+
+
+/* Two concluding conceptual scenes: three paths to an SDK, then enforceable boundaries. */
+body[data-scene="sdkpaths"] main,body[data-scene="boundaries"] main{left:5%;top:19%;width:32%;max-width:480px}
+body[data-scene="sdkpaths"] h1,body[data-scene="boundaries"] h1{font-size:clamp(48px,4.8vw,76px);line-height:.99}
+body[data-scene="sdkpaths"] #description,body[data-scene="boundaries"] #description{font-size:clamp(14px,1.1vw,17px);line-height:1.62;max-width:410px}
+body[data-scene="sdkpaths"] #world,body[data-scene="boundaries"] #world{width:68%;right:0;top:7%;height:88%}
+body[data-scene="sdkpaths"] #sceneLabel,body[data-scene="boundaries"] #sceneLabel{right:19%;bottom:12%}
+body[data-scene="sdkpaths"] #annotation,body[data-scene="boundaries"] #annotation{right:5%;top:16%;color:#b76649}
+body[data-scene="sdkpaths"] #interactive,body[data-scene="boundaries"] #interactive{max-width:430px}
+.boundary-status{width:100%;max-width:400px;border-top:1px dashed #b9b6a6;padding:10px 0;margin:4px 0 0;font:600 11px/1.5 'DM Sans',sans-serif;letter-spacing:.25px;color:#586659}
+@media(min-width:801px) and (max-height:740px){
+ body[data-scene="sdkpaths"] main,body[data-scene="boundaries"] main{top:17%}
+ body[data-scene="sdkpaths"] h1,body[data-scene="boundaries"] h1{font-size:clamp(46px,4.4vw,64px)}
+ body[data-scene="sdkpaths"] #interactive,body[data-scene="boundaries"] #interactive{margin-top:15px}
+}
+@media(max-width:800px){
+ body[data-scene="sdkpaths"] #world,body[data-scene="boundaries"] #world{width:100%;height:45%;top:7%}
+ body[data-scene="sdkpaths"] main,body[data-scene="boundaries"] main{left:7%;top:53%;width:86%;max-width:none}
+ body[data-scene="sdkpaths"] h1,body[data-scene="boundaries"] h1{font-size:clamp(31px,8vw,43px);margin-bottom:8px}
+ body[data-scene="sdkpaths"] #description,body[data-scene="boundaries"] #description{font-size:12px;line-height:1.43;max-width:98%}
+ body[data-scene="sdkpaths"] #sceneLabel,body[data-scene="boundaries"] #sceneLabel{right:16%;top:43%;bottom:auto}
+ body[data-scene="sdkpaths"] #annotation,body[data-scene="boundaries"] #annotation{right:5%;top:12%;font-size:16px}
+ body[data-scene="sdkpaths"] #interactive,body[data-scene="boundaries"] #interactive{margin-top:10px}
+ .boundary-status{font-size:10px;padding:6px 0}
+}
+@media(max-width:800px) and (max-height:780px){
+ body[data-scene="sdkpaths"],body[data-scene="boundaries"]{overflow-y:auto}
+ body[data-scene="sdkpaths"] #world,body[data-scene="boundaries"] #world{height:39%}
+ body[data-scene="sdkpaths"] main,body[data-scene="boundaries"] main{top:48%;padding-bottom:100px}
+ body[data-scene="sdkpaths"] #sceneLabel,body[data-scene="boundaries"] #sceneLabel{top:37%}
+}
