@@ -10,7 +10,7 @@ const slides=[
 {tag:'06 / MORE STEPS, SAME PATTERN',title:'Less plumbing.<br><em>New obligations.</em>',desc:'Memory management, objects and remote calls moved work behind interfaces. Each interface came with assumptions.',gain:'Bookkeeping and implementation details.',cost:'Lifetimes, boundaries, latency and partial failure.',scene:'layers',label:'GC / objects / remote calls',annotation:'Abstraction ≠<br>disappearance.',section:'A little history',note:'Treat GC, OOP and RPC as three examples, not a strict chronological ladder. Choose one concrete trade-off for each.'},
 {tag:'07 / ONE AGENT, MANY PLUGS',title:'One agent.<br><em>Many plugs.</em>',desc:'The Copilot CLI is a general-purpose agent: it uses the terminal, the file system and writes its own scripts. The SDK is the power strip — plug in any experience you want to build.',scene:'powerstrip',label:'CLI runtime → SDK → your experience',annotation:'One agent.<br>Plug it in anywhere.',section:'Architecture',note:'The SDK communicates with the Copilot CLI runtime over JSON-RPC. You can talk to the CLI directly in the terminal. Through the SDK (JSON-RPC to the CLI runtime) the same agent powers your own C#/Python program, the VS Code Agent window and the Copilot App. The empty socket is the invitation: what would you plug in? Sources: github.com/github/copilot-sdk.'},
 {tag:'08 / WHERE YOU MEET IT',title:'Four places<br>to <em>plug in.</em>',desc:'The same agent already shows up in tools you use — and in your own code. Three are available today; one is waiting for approval.',scene:'places',label:'available today: 3 · pending approval: 1',annotation:'Already on<br>your desk.',section:'In practice',note:'Four practical entry points. (1) VS Code Agent Window: the icon in the title bar opens it. (2) The harness picker in VS Code chat: "Copilot" is the Copilot SDK harness, "Local" is the original Copilot Chat, "Cloud" does not work in NN yet. (3) Your own code: a small C# program using the GitHub.Copilot SDK — one CopilotClient, two agents (an implementer and a reviewer called Steve), and a live view in VS Code through the experimental Agent Host Protocol. (4) The GitHub Copilot app: an agent-native desktop app, currently in the approval process at the Engineering Standards Board, so not available in NN yet.'},
-{tag:'09 / LESSONS FROM THE FIELD',title:'Context was<br><em>already there.</em>',desc:'Memory, preferences and user instructions carried over from the VS Code experience.',scene:'lessons',label:'01 / context survives the move',annotation:'Less setup<br>than expected.',section:'Practical findings',note:'Personal experiment: existing memory, preferences and user instructions worked with the SDK. Do not promise identical loading behavior for every SDK release or session type. This scene has five presenter-controlled lessons.'},
+{tag:'09 / LESSONS FROM THE FIELD',title:'Context needed<br><em>a migration.</em>',desc:'Moving from the VS Code chat harness to the SDK meant hunting down memory, preferences and user instructions, then reconnecting them.',scene:'lessons',label:'01 / manually carrying the context across',annotation:'Not a<br>free transfer.',section:'Practical findings',note:'My actual experience: memory, preferences and user instructions did not simply follow automatically between VS Code and my SDK workflow. Their locations and configuration required investigation and migration work. This is my concrete setup, not a universal claim about every SDK configuration.'},
 ];
 const eniacPhoto=new Image();eniacPhoto.src='assets/eniac.jpeg';
 let escalatorSteps=[], cinemaReels=[], cinemaBeam=null, escalatorPaused=false, projectionOn=true;
@@ -272,7 +272,7 @@ const placesBoard=document.createElement('section');placesBoard.id='places';plac
 /* Interactive field notes: five low-poly miniature machines, not a bullet list.
    All claims are qualitative observations, not synthetic performance benchmarks. */
 const lessonBeats=[
- {title:'Context was<br><em>already there.</em>',desc:'Memory, preferences and user instructions worked when I moved from the VS Code chat harness to the SDK.',finding:'I did not have to rebuild all the context machinery.',tag:'CONTEXT',label:'01 / context survives the move',annotation:'Less setup<br>than expected.',note:'My observation: memory, preferences and user instructions worked. This is an experience report, not a guarantee that all sources load identically on every SDK version or when resuming sessions.'},
+ {title:'Context needed<br><em>a migration.</em>',desc:'Memory, preferences and user instructions lived in different places. I had to find them and adapt the setup when moving from the VS Code chat harness to the SDK.',finding:'The agent runtime is reusable. Its working context still needs migration.',tag:'MIGRATION',label:'01 / hunt, extract, reconnect',annotation:'Not a<br>free transfer.',note:'Personal lesson: memory, preferences and user instructions did not automatically carry over. I had to locate where they were stored or loaded and reconfigure their use in the SDK workflow. Avoid the earlier incorrect claim that context just worked without migration.'},
  {title:'Agents needed<br><em>clearer roles.</em>',desc:'Subagents were not simply inherited as an implicit team. I had to declare their roles and boundaries more explicitly.',finding:'Give each specialist a job, tools and a handoff contract.',tag:'DELEGATION',label:'02 / explicit contracts for subagents',annotation:'Declare the<br>crew.',note:'Define a product-owner orchestrator, architect, coder and adversarial reviewer. In the demo, distinguish actual role configuration from imagined autonomous teamwork.'},
  {title:'Copilot helped<br><em>build Copilot.</em>',desc:'A useful bootstrap: I used GitHub Copilot to write and refine the SDK workflow that would eventually invoke Copilot.',finding:'Use the harness to help engineer its own surrounding workflow.',tag:'BOOTSTRAP',label:'03 / building the machine with the machine',annotation:'A small<br>recursion.',note:'This is a real workflow-building strategy, not a claim that the agent autonomously invented or verified an entire software factory.'},
  {title:'A heartbeat is<br><em>not progress.</em>',desc:'Long-running work needs a velocity signal, a kaizen-style improvement loop and a way to distinguish activity from actual progress.',finding:'Watch liveness, progress and completion separately.',tag:'OBSERVABILITY',label:'04 / alive is not the same as advancing',annotation:'Heartbeat ≠<br>done.',note:'Track heartbeat and tool activity, but also advancing milestones, attempts, duration and evidence of completion. A session can be alive yet stuck waiting for permission or retrying without improvement.'},
@@ -299,15 +299,40 @@ function lessonPlinth(){
 function lessonDiorama(){
  lessonActors=[];lessonClock=0;lessonPlinth();
  if(lessonStep===0){
-   lessonWorker(1.65,-.12,0,blue,1.35);
-   const rows=[['MEMORY',green,1.16],['PREFS',gold,.12],['INSTRUCTIONS',paper,-.92]];
-   rows.forEach(([name,color,y],i)=>{
-     const x=-1.9;box(1.45,.67,.55,color,x,y,-.2);textSprite(name,x,y+.11,.26,.37);
-     line([[x+.78,y,-.2],[-.15,y,-.2],[.45,.30,0],[.93,.30,0]],0x8d998a);
-     lessonPacket([x+.83,y,.10],[1.15,.3,.15],i===0?green:i===1?gold:orange,i*.28,.25);
+   // Two separate environments, with no magical shared context.
+   // The scattered folders and interrupted lines represent manual discovery and porting.
+   box(2.2,2.52,.86,blue,-1.94,.16,-.55);
+   box(1.76,.38,.12,paper,-1.94,1.09,-.05);
+   textSprite('VS CODE',-1.94,1.18,.16,.45);
+   const folders=[['MEMORY',green,.63,-2.19,-.10],['PREFS',gold,-.12,-1.74,.07],['INSTR.',paper,-.85,-2.06,-.05]];
+   folders.forEach(([label,c,y,x,z],i)=>{
+     box(.97,.42,.16,c,x,y,z);
+     textSprite(label,x,y+.095,z+.16,.29);
+     box(.2,.09,.06,ink,x-.30,y+.25,z+.11);
    });
-   ball(.24,gold,1.65,.92,0);
-   textSprite('WORKING CONTEXT',1.45,1.7,0,.45);
+   // Search lens in the middle. It is intentionally larger than the artifacts.
+   const lens=mesh(new THREE.TorusGeometry(.40,.07,5,10),gold,-.04,.76,.43);
+   lens.rotation.z=-.26;
+   const handle=box(.12,.85,.15,ink,.34,.23,.43);handle.rotation.z=-.58;
+   // Reconfiguration desk and three destination slots.
+   box(1.25,.17,1.20,green,.20,-1.05,.27);
+   textSprite('FIND + PORT',.15,-.81,.95,.42);
+   box(1.55,2.0,.90,paper,2.04,.07,-.51);
+   box(1.25,.34,.14,gold,2.04,.81,.02);
+   textSprite('SDK',2.04,.89,.24,.44);
+   for(let i=0;i<3;i++){
+     box(.99,.30,.12,[green,gold,blue][i],2.04,.36-i*.51,.03);
+     box(.12,.13,.12,ink,1.68,.36-i*.51,.13);
+   }
+   // A broken bridge. Animated artifacts must pass through the porting workbench.
+   line([[-.93,.20,.18],[-.51,.20,.18]],orange);
+   line([[.56,-.26,.18],[1.22,-.26,.18]],orange);
+   for(let i=0;i<3;i++){
+     const y=.57-i*.50;
+     const doc=box(.30,.27,.07,[green,gold,orange][i],-1.0,y,.54);
+     lessonActors.push({o:doc,a:[-1.10,y,.54],b:[1.55,-.02-i*.22,.54],phase:i*.30,speed:.115,manual:true});
+   }
+   textSprite('HUNT  →  EXTRACT  →  REWIRE',0,1.91,.05,.43);
  }
  if(lessonStep===1){
    mesh(new THREE.CylinderGeometry(.72,.82,.56,6),gold,0,.05,0);
@@ -378,6 +403,14 @@ function animateLessons(dt){
    if(a.orbit){const t=lessonClock*.42; a.o.position.set(2.05*Math.cos(t),.25+1.18*Math.sin(t),.24);continue}
    let t=(lessonClock*a.speed+a.phase)%1;
    if(a.queue)t=Math.min(t*.95,.75);
+   if(a.manual){
+     // Staged journey: pause at the magnifier and porting bench.
+     const p=t<.37?(t/.37)*.34:t<.63?.34+(t-.37)/.26*.32:.66+(t-.63)/.37*.34;
+     const hold=(t>.27&&t<.37)||(t>.56&&t<.63);
+     const eased=hold?(t<.5?.34:.66):p;
+     a.o.position.set(a.a[0]+(a.b[0]-a.a[0])*eased,a.a[1]+(a.b[1]-a.a[1])*eased+Math.sin(t*Math.PI)*.22,a.a[2]+(a.b[2]-a.a[2])*eased);
+     continue;
+   }
    const ease=t*t*(3-2*t);
    a.o.position.set(a.a[0]+(a.b[0]-a.a[0])*ease,a.a[1]+(a.b[1]-a.a[1])*ease+.08*Math.sin(t*Math.PI),a.a[2]+(a.b[2]-a.a[2])*ease);
  }
