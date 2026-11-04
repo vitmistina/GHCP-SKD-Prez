@@ -33,6 +33,9 @@ jobs:
           ref: main
           fetch-depth: 0
 
+      - name: Validate presentation JavaScript
+        run: node --input-type=module --check < dist/app.js
+
       - name: Rebuild standalone offline HTML
         run: |
           git pull --ff-only origin main
