@@ -27,7 +27,7 @@ function mesh(geo,color,x=0,y=0,z=0,parent=root){const m=new THREE.Mesh(geo,new 
 function box(w,h,d,c,x=0,y=0,z=0,p=root){return mesh(new THREE.BoxGeometry(w,h,d),c,x,y,z,p)}
 function ball(r,c,x=0,y=0,z=0,p=root){return mesh(new THREE.IcosahedronGeometry(r,1),c,x,y,z,p)}
 function line(points,color=ink,parent=root){const g=new THREE.BufferGeometry().setFromPoints(points.map(p=>new THREE.Vector3(...p)));const l=new THREE.Line(g,new THREE.LineBasicMaterial({color,transparent:true,opacity:.7}));parent.add(l);return l}
-function textSprite(text,x,y,z,size=.4,color='#30372e'){const c=document.createElement('canvas');c.width=1024;c.height=192;const ctx=c.getContext('2d');ctx.font='100px Caveat, Comic Sans MS, cursive';ctx.textAlign='center';ctx.fillStyle=color;ctx.fillText(text,512,125);const tex=new THREE.CanvasTexture(c);const s=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,depthTest:false}));s.position.set(x,y,z);s.scale.set(size*5.33,size,1);root.add(s);return s}
+function textSprite(text,x,y,z,size=.4,color='#30372e'){const c=document.createElement('canvas');c.width=1024;c.height=192;const ctx=c.getContext('2d');ctx.font='100px Caveat, Comic Sans MS, cursive';ctx.textAlign='center';ctx.fillStyle=color;ctx.fillText(text,512,125);const tex=new THREE.CanvasTexture(c);const s=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,depthTest:false}));s.userData.ditherCategory='text';s.position.set(x,y,z);s.scale.set(size*5.33,size,1);root.add(s);return s}
 function arrow(a,b,color=ink){line([a,b],color);const v=new THREE.Vector3(...b).sub(new THREE.Vector3(...a)).normalize();const h=new THREE.ArrowHelper(v,new THREE.Vector3(...b).addScaledVector(v,-.25),.25,color,.18,.10);root.add(h)}
 function platform(){const p=mesh(new THREE.CylinderGeometry(3.3,3.3,.13,48),0xe9e4d7,0,-1.65,0);p.rotation.y=.1}
 function oldStairs(){for(let i=0;i<7;i++){const x=(i-3)*.75,y=-1.4+i*.48;const s=box(.85,.23,1.5,[blue,paper,green,paper,gold,blue,gold][i],x,y,0);s.rotation.y=(random()-.5)*.08;line([[x-.4,y-.1,.76],[x-.4,-1.8,.76],[x+.4,-1.8,.76],[x+.4,y-.1,.76]],0xb9b9a8);if([0,2,4,6].includes(i))textSprite(['arithmetic','','language','','agents','','what next?'][i],x,y+.4,0,.3)}for(let i=0;i<7;i++)ball(.45+random()*.2,paper,2.5+(random()-.5)*1.9,2.15+random()*.4,-.6+random()*.8);line([[-3,-1.9,1.2],[-2.4,-1.6,1.2],[-1.8,-1.3,1.2],[-1.2,-.9,1.2],[-.5,-.4,1.2],[.4,.2,1.2],[1.2,.8,1.2],[2,1.4,1.2]],orange)}
@@ -70,7 +70,7 @@ function cinema(){
  if(eniacPhoto.complete&&eniacPhoto.naturalWidth){
   const tex=new THREE.Texture(eniacPhoto);tex.colorSpace=THREE.SRGBColorSpace;tex.needsUpdate=true;
   screen.material.dispose();screen.material=new THREE.MeshBasicMaterial({map:tex,color:projectionOn?0xffffff:0x191d19});
-  screen.userData.photo={image:eniacPhoto,w,h};
+  screen.userData.photo={image:eniacPhoto,w,h};screen.userData.ditherCategory='photo';
  }
  for(const x of [-1.65,1.65]){box(.07,1.2,.08,ink,x,-1.6,-.02);box(.55,.08,.6,ink,x,-2.2,0)}
  // Small film projector in the foreground with two animated reels.
@@ -215,7 +215,7 @@ function buildDSKY(parent){
  rows.forEach((row,j)=>row.forEach((v,i)=>{if(!v)return;const x=31+i*121,y=650+j*105;ctx.fillStyle='#646e68';ctx.fillRect(x-3,y-3,112,94);ctx.fillStyle='#263c37';ctx.fillRect(x,y,105,85);v.split(' ').forEach((t,k,arr)=>label(t,x+52,y+(arr.length===1?53:35+k*27),v.length>3?21:32,'#edf0dc'));}));
  for(const x of [17,883])for(const y of [18,980]){ctx.fillStyle='#6b726b';ctx.beginPath();ctx.arc(x,y,8,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#dce0d3';ctx.beginPath();ctx.moveTo(x-5,y);ctx.lineTo(x+5,y);ctx.stroke();}
  const tex=new THREE.CanvasTexture(c);tex.colorSpace=THREE.SRGBColorSpace;
- const face=new THREE.Mesh(new THREE.PlaneGeometry(w-.14,h-.14),new THREE.MeshBasicMaterial({map:tex}));face.position.z=.158;face.userData.photo={image:c,w:w-.14,h:h-.14};parent.add(face);
+ const face=new THREE.Mesh(new THREE.PlaneGeometry(w-.14,h-.14),new THREE.MeshBasicMaterial({map:tex}));face.position.z=.158;face.userData.photo={image:c,w:w-.14,h:h-.14};face.userData.ditherCategory='text';parent.add(face);
 }
 
 function buildApollo(){
@@ -711,12 +711,12 @@ class PaperRenderer {
  constructor(canvas){this.canvas=canvas;this.ctx=canvas.getContext('2d');this.shadowMap={};this.ratio=1;}
  setPixelRatio(r){this.ratio=Math.min(r,1.5)} setClearColor(){}
  setSize(w,h){this.w=w;this.h=h;this.canvas.width=w*this.ratio;this.canvas.height=h*this.ratio}
- render(scene,camera){const ctx=this.ctx;ctx.setTransform(this.ratio,0,0,this.ratio,0,0);ctx.clearRect(0,0,this.w,this.h);scene.updateMatrixWorld();camera.updateMatrixWorld();const items=[];const project=v=>{const p=v.clone().project(camera);return [(p.x*.5+.5)*this.w,(-p.y*.5+.5)*this.h,p.z]};
- const shadow=project(new THREE.Vector3(0,-2.35,0));ctx.save();ctx.translate(shadow[0],shadow[1]);ctx.scale(1,.25);const grad=ctx.createRadialGradient(0,0,10,0,0,this.w*.26);grad.addColorStop(0,'rgba(90,85,65,.12)');grad.addColorStop(1,'rgba(90,85,65,0)');ctx.fillStyle=grad;ctx.beginPath();ctx.arc(0,0,this.w*.26,0,Math.PI*2);ctx.fill();ctx.restore();
- scene.traverse(o=>{if(!o.visible)return;if(o.isSprite&&o.material.map){const v=o.getWorldPosition(new THREE.Vector3());const p=project(v);const sz=o.getWorldScale(new THREE.Vector3());const d=v.distanceTo(camera.position);const h=this.h*sz.y/(2*Math.tan(camera.fov*Math.PI/360)*d);items.push({z:p[2]-.002,sprite:o.material.map.image,x:p[0],y:p[1],w:h*sz.x/sz.y,h});return}if(o.userData.photo){const {image,w,h}=o.userData.photo;const ps=[[-w/2,h/2,0],[w/2,h/2,0],[w/2,-h/2,0],[-w/2,-h/2,0]].map(p=>project(new THREE.Vector3(...p).applyMatrix4(o.matrixWorld)));items.push({z:ps.reduce((a,p)=>a+p[2],0)/4-.01,photo:image,ps});return;}if(!o.geometry||o.material?.isShadowMaterial)return;const pos=o.geometry.attributes.position;if(!pos)return;const pts=[];for(let i=0;i<pos.count;i++)pts.push(new THREE.Vector3().fromBufferAttribute(pos,i).applyMatrix4(o.matrixWorld));const indices=o.geometry.index?.array;const n=indices?indices.length:pos.count;const at=i=>indices?indices[i]:i;const c=o.material.color||new THREE.Color(0x30372e);
- if(o.isMesh){for(let i=0;i<n;i+=3){const a=pts[at(i)],b=pts[at(i+1)],d=pts[at(i+2)];if(!d)continue;const normal=b.clone().sub(a).cross(d.clone().sub(a)).normalize();if(o.material.side!==THREE.DoubleSide&&normal.dot(camera.position.clone().sub(a))<0)continue;const ps=[project(a),project(b),project(d)];const shade=.78+.22*Math.max(0,normal.dot(new THREE.Vector3(-.3,.8,.5).normalize()));const rgb=c.clone().convertLinearToSRGB();items.push({z:(ps[0][2]+ps[1][2]+ps[2][2])/3,ps,fill:`rgba(${Math.round(rgb.r*255*shade)},${Math.round(rgb.g*255*shade)},${Math.round(rgb.b*255*shade)},${o.material.opacity??1})`})}}
- else if(o.isLine){for(let i=0;i<n-1;i+=o.isLineSegments?2:1){const ps=[project(pts[at(i)]),project(pts[at(i+1)])];items.push({z:(ps[0][2]+ps[1][2])/2-.00015,ps,stroke:'#454b3c',alpha:o.material.opacity??1})}}});
- items.sort((a,b)=>b.z-a.z);for(const it of items){if(it.photo){
+ render(scene,camera,preserveOnly=null){const ctx=this.ctx;ctx.globalCompositeOperation='source-over';ctx.setTransform(this.ratio,0,0,this.ratio,0,0);ctx.clearRect(0,0,this.w,this.h);scene.updateMatrixWorld();camera.updateMatrixWorld();const items=[];const project=v=>{const p=v.clone().project(camera);return [(p.x*.5+.5)*this.w,(-p.y*.5+.5)*this.h,p.z]};
+ if(!preserveOnly){const shadow=project(new THREE.Vector3(0,-2.35,0));ctx.save();ctx.translate(shadow[0],shadow[1]);ctx.scale(1,.25);const grad=ctx.createRadialGradient(0,0,10,0,0,this.w*.26);grad.addColorStop(0,'rgba(90,85,65,.12)');grad.addColorStop(1,'rgba(90,85,65,0)');ctx.fillStyle=grad;ctx.beginPath();ctx.arc(0,0,this.w*.26,0,Math.PI*2);ctx.fill();ctx.restore();}
+ scene.traverseVisible(o=>{const preserve=preserveOnly?.(o);if(o.isSprite&&o.material.map){const v=o.getWorldPosition(new THREE.Vector3());const p=project(v);const sz=o.getWorldScale(new THREE.Vector3());const d=v.distanceTo(camera.position);const h=this.h*sz.y/(2*Math.tan(camera.fov*Math.PI/360)*d);items.push({preserve,z:p[2]-.002,sprite:o.material.map.image,x:p[0],y:p[1],w:h*sz.x/sz.y,h});return}if(o.userData.photo){const {image,w,h}=o.userData.photo;const ps=[[-w/2,h/2,0],[w/2,h/2,0],[w/2,-h/2,0],[-w/2,-h/2,0]].map(p=>project(new THREE.Vector3(...p).applyMatrix4(o.matrixWorld)));items.push({preserve,z:ps.reduce((a,p)=>a+p[2],0)/4-.01,photo:image,ps});return;}if(!o.geometry||o.material?.isShadowMaterial)return;const pos=o.geometry.attributes.position;if(!pos)return;const pts=[];for(let i=0;i<pos.count;i++)pts.push(new THREE.Vector3().fromBufferAttribute(pos,i).applyMatrix4(o.matrixWorld));const indices=o.geometry.index?.array;const n=indices?indices.length:pos.count;const at=i=>indices?indices[i]:i;const c=o.material.color||new THREE.Color(0x30372e);
+ if(o.isMesh){for(let i=0;i<n;i+=3){const a=pts[at(i)],b=pts[at(i+1)],d=pts[at(i+2)];if(!d)continue;const normal=b.clone().sub(a).cross(d.clone().sub(a)).normalize();if(o.material.side!==THREE.DoubleSide&&normal.dot(camera.position.clone().sub(a))<0)continue;const ps=[project(a),project(b),project(d)];const shade=.78+.22*Math.max(0,normal.dot(new THREE.Vector3(-.3,.8,.5).normalize()));const rgb=c.clone().convertLinearToSRGB();items.push({preserve,z:(ps[0][2]+ps[1][2]+ps[2][2])/3,ps,fill:`rgba(${Math.round(rgb.r*255*shade)},${Math.round(rgb.g*255*shade)},${Math.round(rgb.b*255*shade)},${o.material.opacity??1})`})}}
+ else if(o.isLine){for(let i=0;i<n-1;i+=o.isLineSegments?2:1){const ps=[project(pts[at(i)]),project(pts[at(i+1)])];items.push({preserve,z:(ps[0][2]+ps[1][2])/2-.00015,ps,stroke:'#454b3c',alpha:o.material.opacity??1})}}});
+ items.sort((a,b)=>b.z-a.z);for(const it of items){ctx.globalCompositeOperation=preserveOnly&&!it.preserve?'destination-out':'source-over';if(it.photo){
  const im=it.photo,uv=[[0,0],[im.width,0],[im.width,im.height],[0,im.height]];
  for(const tri of [[0,1,2],[0,2,3]]){
   const [a,b,c]=tri.map(i=>it.ps[i]),[u,v,w]=tri.map(i=>uv[i]);
@@ -726,7 +726,7 @@ class PaperRenderer {
   const C=((c[0]-a[0])*(v[0]-u[0])-(b[0]-a[0])*(w[0]-u[0]))/det;
   const D=((c[1]-a[1])*(v[0]-u[0])-(b[1]-a[1])*(w[0]-u[0]))/det;
   ctx.save();ctx.globalAlpha=1;ctx.beginPath();ctx.moveTo(...a.slice(0,2));ctx.lineTo(...b.slice(0,2));ctx.lineTo(...c.slice(0,2));ctx.closePath();ctx.clip();ctx.transform(A,B,C,D,a[0]-A*u[0]-C*u[1],a[1]-B*u[0]-D*u[1]);ctx.drawImage(im,0,0);ctx.restore();
- }continue;}if(it.sprite){ctx.globalAlpha=1;ctx.drawImage(it.sprite,it.x-it.w/2,it.y-it.h/2,it.w,it.h);continue}ctx.globalAlpha=it.alpha??1;ctx.beginPath();it.ps.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));if(it.fill){ctx.closePath();ctx.fillStyle=it.fill;ctx.fill()}else{ctx.strokeStyle=it.stroke;ctx.lineWidth=.9;ctx.stroke()}}ctx.globalAlpha=1;
+ }continue;}if(it.sprite){ctx.globalAlpha=1;ctx.drawImage(it.sprite,it.x-it.w/2,it.y-it.h/2,it.w,it.h);continue}ctx.globalAlpha=it.alpha??1;ctx.beginPath();it.ps.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));if(it.fill){ctx.closePath();ctx.fillStyle=it.fill;ctx.fill()}else{ctx.strokeStyle=it.stroke;ctx.lineWidth=.9;ctx.stroke()}}ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';
  }
 }
 
@@ -747,6 +747,48 @@ if(slides[index].scene==='wardley')wardleyScene?.animate(dt);
 if(slides[index].scene==='sdkpaths')animateSdkPaths(dt);
 if(slides[index].scene==='boundaries')animateBoundaries(dt);
 if(slides[index].scene==='powerstrip')animatePowerStrip(now,dt);
-if(slides[index].scene==='harness'&&auto&&objects[0]){const a=now*.001;objects[0].position.set(Math.cos(a)*2.65,Math.sin(a)*2.05,-.4)}if(slides[index].scene==='brain'&&!reduced)objects.forEach((o,i)=>o.scale.setScalar(1+Math.sin(now*.001+i)*.1));if(slides[index].scene==='eniac'&&!reduced)objects.forEach((o,i)=>o.material.emissive.setHex(Math.sin(now*.002+i)> .8?0x443300:0));if(slides[index].scene==='workflow'&&sim){let stage=Math.floor((now-simStart)/1200);const seq=fail?[0,1,2,3,1,2,3]:[0,1,2,3];const msgs=fail?['Assigning a bounded change','Agent edits the workspace','Check failed: evidence returned','Repair requested · attempt 2 of 2','Agent applies a repair','Check passes','Accepted with evidence']:['Assigning a bounded change','Agent edits the workspace','Check passes','Accepted with evidence'];if(stage<seq.length){objects.forEach((o,i)=>o.scale.setScalar(i===seq[stage]?1.1:1));if(simStatus!==msgs[stage]){$('drawingTitle').textContent=msgs[stage];simStatus=msgs[stage]}}else{sim=0;objects.forEach(o=>o.scale.setScalar(1));$('drawingTitle').textContent='Done. Outcome checked, not merely asserted.'}}renderer.render(scene,camera)}requestAnimationFrame(frame);
+if(slides[index].scene==='harness'&&auto&&objects[0]){const a=now*.001;objects[0].position.set(Math.cos(a)*2.65,Math.sin(a)*2.05,-.4)}if(slides[index].scene==='brain'&&!reduced)objects.forEach((o,i)=>o.scale.setScalar(1+Math.sin(now*.001+i)*.1));if(slides[index].scene==='eniac'&&!reduced)objects.forEach((o,i)=>o.material.emissive.setHex(Math.sin(now*.002+i)> .8?0x443300:0));if(slides[index].scene==='workflow'&&sim){let stage=Math.floor((now-simStart)/1200);const seq=fail?[0,1,2,3,1,2,3]:[0,1,2,3];const msgs=fail?['Assigning a bounded change','Agent edits the workspace','Check failed: evidence returned','Repair requested · attempt 2 of 2','Agent applies a repair','Check passes','Accepted with evidence']:['Assigning a bounded change','Agent edits the workspace','Check passes','Accepted with evidence'];if(stage<seq.length){objects.forEach((o,i)=>o.scale.setScalar(i===seq[stage]?1.1:1));if(simStatus!==msgs[stage]){$('drawingTitle').textContent=msgs[stage];simStatus=msgs[stage]}}else{sim=0;objects.forEach(o=>o.scale.setScalar(1));$('drawingTitle').textContent='Done. Outcome checked, not merely asserted.'}}renderPresentation()}requestAnimationFrame(frame);
 
-initDithering();
+// The original renderer remains the only WebGL context. An optional second
+// pass copies preserved labels/photos into a transparent, unfiltered layer.
+const preservedCanvas=document.createElement('canvas');
+preservedCanvas.id='world-preserved';preservedCanvas.hidden=true;
+preservedCanvas.setAttribute('aria-hidden','true');$('world').after(preservedCanvas);
+const preservedContext=preservedCanvas.getContext('2d');
+let preservedPosition='';
+const dithering=initDithering();
+function renderPresentation(){
+ const exclusions=dithering.getExclusions();
+ const selected=[];
+ if(exclusions.text||exclusions.photos)scene.traverseVisible(o=>{
+  if((exclusions.text&&o.userData.ditherCategory==='text')||(exclusions.photos&&o.userData.ditherCategory==='photo'))selected.push(o);
+ });
+ preservedCanvas.hidden=!selected.length;
+ if(!selected.length){renderer.render(scene,camera);return;}
+ const selectedSet=new Set(selected),world=$('world'),rect=world.getBoundingClientRect();
+ const position=`position:fixed;left:${rect.left}px;top:${rect.top}px;width:${rect.width}px;height:${rect.height}px;pointer-events:none`;
+ if(preservedPosition!==position){preservedCanvas.style.cssText=position;preservedPosition=position;}
+ if(preservedCanvas.width!==world.width||preservedCanvas.height!==world.height){preservedCanvas.width=world.width;preservedCanvas.height=world.height;}
+ const materials=new Map(),shadowUpdate=renderer.shadowMap.autoUpdate;
+ try{
+  if(renderer.isWebGLRenderer){
+   scene.traverseVisible(o=>{
+    for(const material of o.material?(Array.isArray(o.material)?o.material:[o.material]):[]){
+     if(!materials.has(material))materials.set(material,material.colorWrite);
+     material.colorWrite=selectedSet.has(o)&&materials.get(material);
+    }
+   });
+   // Keep depth testing/occlusion, but don't recompute shadows for this pass.
+   renderer.shadowMap.autoUpdate=false;
+   renderer.render(scene,camera);
+  }else renderer.render(scene,camera,o=>selectedSet.has(o));
+  preservedContext.clearRect(0,0,preservedCanvas.width,preservedCanvas.height);
+  preservedContext.drawImage(world,0,0);
+ }finally{
+  for(const [material,colorWrite] of materials)material.colorWrite=colorWrite;
+  renderer.shadowMap.autoUpdate=shadowUpdate;
+ }
+ // Don't leave dithered glyphs underneath their antialiased original edges.
+ try{for(const o of selected)o.visible=false;renderer.render(scene,camera);}
+ finally{for(const o of selected)o.visible=true;}
+}

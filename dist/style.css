@@ -1,5 +1,13 @@
 /* The filter has an opaque backing and a stable viewport-sized coordinate space. */
 #presentation-surface{position:absolute;inset:0;min-height:100vh;background:var(--paper);isolation:isolate}
+#dither-background{position:absolute;inset:0;background:var(--paper);pointer-events:none}
+#world-preserved{pointer-events:none}
+#world-preserved[hidden]{display:none}
+.dither-exclusions{margin:16px 0;padding:12px;border:1px solid #d9d5c8;border-radius:8px}
+.dither-exclusions legend{font-size:11px;font-weight:600;padding:0 5px}
+.dither-exclusions label{display:flex;align-items:center;gap:8px;margin:5px 0 12px;font-size:12px;cursor:pointer}
+.dither-exclusions input{width:17px;height:17px;accent-color:#52674a}
+.dither-exclusions .dither-help{margin:8px 0 0}
 #dither-launcher{position:fixed;right:4%;bottom:94px;z-index:20;background:#f5f1e8;padding:10px 17px;font-size:12px;box-shadow:0 3px 16px #292e2c15}
 #dither-launcher[data-enabled="true"]{background:#292e2c;color:#f5f1e8;border-color:#292e2c}
 #dither-panel{position:fixed;right:18px;top:18px;bottom:18px;width:min(350px,calc(100vw - 36px));z-index:30;overflow-y:auto;overscroll-behavior:contain;padding:25px;background:#f8f5ed;color:#292e2c;border:1px solid #c9c5b8;border-radius:14px;box-shadow:0 16px 65px #20282030;font:13px 'DM Sans',sans-serif;scrollbar-width:thin}
@@ -26,7 +34,7 @@
 #dither-compare[aria-pressed="true"]{background:#ebc462}
 #dither-panel :is(input,select):focus-visible{outline:3px solid var(--orange);outline-offset:3px}
 @media(max-width:800px){#dither-launcher{right:4%;bottom:85px;padding:8px 12px}#dither-panel{top:10px;right:10px;bottom:10px;width:min(350px,calc(100vw - 20px));padding:20px}}
-@media print{#dither-launcher,#dither-panel{display:none!important}#presentation-surface,#world{filter:none!important}}
+@media print{#dither-launcher,#dither-panel{display:none!important}#presentation-surface,#presentation-surface *{filter:none!important}}
 @font-face {
   font-family: 'Caveat';
   font-style: normal;
