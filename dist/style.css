@@ -150,3 +150,35 @@ body[data-scene="places"] #world{pointer-events:none}body[data-scene="places"] #
 @media(prefers-reduced-motion:no-preference){.place-card{animation:place-pin .7s cubic-bezier(.2,.8,.3,1.15) var(--delay) backwards}}
 @keyframes place-pin{from{opacity:0;transform:translateY(22px) rotate(calc(var(--tilt)*3)) scale(.96)}}
 @media(max-width:800px){#places{inset:12% 3% auto;height:42%;display:flex;gap:2%;align-items:center;justify-content:center}.place-card{position:relative;left:auto;right:auto;top:auto;width:23.5%;padding:4px 4px 5px}.place-card b{font-size:14px}.place-card span{font-size:8px}.place-card .stamp{font-size:7px;padding:3px 4px;letter-spacing:.8px}.place-card:before{width:44px;height:12px;margin-left:-22px;top:-6px}}
+
+/* Final low-poly Wardley map, preserving paper, ink, and Caveat styling. */
+body[data-scene="wardley"] main{left:5%;top:19%;width:30%;max-width:450px}
+body[data-scene="wardley"] h1{font-size:clamp(48px,4.7vw,76px);line-height:.98}
+body[data-scene="wardley"] #description{max-width:410px}
+body[data-scene="wardley"] #world{width:74%;right:0;top:7%;height:88%}
+body[data-scene="wardley"] #annotation{color:#b76649;right:5%;top:18%;font-size:28px}
+body[data-scene="wardley"] #sceneLabel{right:23%;bottom:11%}
+body[data-scene="wardley"] #sceneLabel small{display:none}
+body[data-scene="wardley"] #trade{max-width:405px;margin-top:24px}
+.wardley-thesis{border-left:3px solid #d8623e;padding:13px 16px;background:#f0e8d9cc;border-radius:0 10px 10px 0}
+.wardley-thesis strong{font-size:10px;letter-spacing:1.5px;color:#ae5b3d}
+.wardley-thesis p{font:500 25px/1.06 Caveat,cursive;margin:6px 0 8px}
+.wardley-thesis small{font-size:10px;color:#74766b}
+@media(max-width:800px){
+ body[data-scene="wardley"] #world{width:100%;height:48%;top:9%}
+ body[data-scene="wardley"] main{left:7%;top:57%;width:86%;max-width:none}
+ body[data-scene="wardley"] h1{font-size:clamp(34px,8vw,44px);margin-bottom:8px}
+ body[data-scene="wardley"] #description{font-size:12px;line-height:1.4}
+ body[data-scene="wardley"] #trade{margin-top:9px}
+ .wardley-thesis{padding:7px 11px}
+ .wardley-thesis p{font-size:17px;margin:4px 0}
+ body[data-scene="wardley"] #interactive{margin-top:9px}
+ body[data-scene="wardley"] #sceneLabel{right:20%;top:47%;bottom:auto}
+ body[data-scene="wardley"] #annotation{top:15%;font-size:16px;right:5%}
+}
+@media(max-width:800px) and (max-height:780px){
+ body[data-scene="wardley"]{overflow-y:auto}
+ body[data-scene="wardley"] #world{height:39%}
+ body[data-scene="wardley"] main{top:49%;padding-bottom:90px}
+ body[data-scene="wardley"] #sceneLabel{top:40%}
+}

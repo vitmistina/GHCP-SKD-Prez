@@ -39,3 +39,9 @@ The photograph of Margaret Hamilton beside her team's Apollo flight software lis
 ## Standalone HTML build
 
 The editable web version lives in `dist/index.html` plus `dist/app.js` and `dist/style.css`. An Actions workflow, `.github/workflows/build-standalone.yml`, runs `python3 build-single.py` when these files change and commits an updated `dist/presentation.html` on `main`. It also supports manual dispatch. If Actions are disabled, run the build locally before sharing the offline export.
+
+## Closing Wardley-inspired 3D map
+
+The final slide, after the five field notes, uses Three.js low-poly models on a physical four-column Wardley-inspired map. It shows the compiler and managed-memory evolution, a custom harness, the **software factory in Genesis today**, and a **red dashed prediction** toward a few mainstream products (not automatically commodities).
+
+It plays its four beats automatically, with pause, replay and next-beat controls. Reduced-motion settings show the complete map. Source: `dist/wardley-scene.js`, included by `dist/app.js`. The standalone export builder also inlines this scene so `dist/presentation.html` continues to work offline.
