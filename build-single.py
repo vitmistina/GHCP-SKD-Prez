@@ -1,9 +1,11 @@
 from pathlib import Path
 import base64,re
-p=Path('dist');html=(p/'index.html').read_text();css=(p/'style.css').read_text()
+p=Path('dist');html=(p/'index.html').read_text(encoding='utf-8');css=(p/'style.css').read_text(encoding='utf-8')
 for font in p.glob('font-*.ttf'):css=css.replace(font.name,'data:font/ttf;base64,'+base64.b64encode(font.read_bytes()).decode())
-js=(p/'app.js').read_text()
-wardley=(p/'wardley-scene.js').read_text().replace('export function createWardley','function createWardley',1)
+js=(p/'app.js').read_text(encoding='utf-8')
+dithering=(p/'dithering.js').read_text(encoding='utf-8').replace('export function initDithering','function initDithering',1)
+js=js.replace("import { initDithering } from './dithering.js';",dithering)
+wardley=(p/'wardley-scene.js').read_text(encoding='utf-8').replace('export function createWardley','function createWardley',1)
 js=js.replace("import { createWardley } from './wardley-scene.js';",wardley)
 js=js.replace("'./three.module.js'","'data:text/javascript;base64,"+base64.b64encode((p/'three.module.js').read_bytes()).decode()+"'")
 js=js.replace('assets/eniac.jpeg','data:image/jpeg;base64,'+base64.b64encode((p/'assets/eniac.jpeg').read_bytes()).decode())
@@ -11,4 +13,4 @@ js=js.replace('assets/hamilton.jpeg','data:image/jpeg;base64,'+base64.b64encode(
 for png in ('sdk-agent-window.png','sdk-harness-picker.png','sdk-code.png','sdk-copilot-app.png'):js=js.replace('assets/'+png,'data:image/png;base64,'+base64.b64encode((p/'assets'/png).read_bytes()).decode())
 html=html.replace('<link rel="stylesheet" href="style.css">','<style>'+css+'</style>').replace('<script type="module" src="app.js"></script>','<script type="module">'+js+'</script>')
 html=re.sub(r'<a href="presentation.html".*?</a>','',html)
-(p/'presentation.html').write_text(html)
+(p/'presentation.html').write_text(html,encoding='utf-8')

@@ -14,6 +14,16 @@ Canonical source for Vít Miština’s illustrated 3D presentation, **Climbing t
 
 Arrow keys / Space: navigate. M: chapter map. N: speaker notes. F: full screen. Drag the illustration to rotate it.
 
+## Dithering / postprocessing
+
+Open **Effects** at the lower right, or press **Shift+D**. **D** toggles the effect; **Esc** closes the panel. It starts disabled and remembers settings in local browser storage when available. Reset restores the disabled default. Show original temporarily bypasses the effect without losing settings.
+
+The panel controls raster cell size (1–16 CSS pixels), Bayer 2×2 / 4×4 / 8×8 or deterministic static noise, strength, effect mix, contrast and brightness. Choose Ink & paper, Game Boy, Sepia archive, Green phosphor, Sunset print, Pastel paper or CGA cyan/magenta. These palettes map luminance to their ordered colors. RGB and grayscale modes offer 1–8 **total bits per pixel** (2–256 colors); RGB uses grayscale at 1–2 bits and distributes higher bit depths across channels, up to RGB 3/3/2 at 8 bits. At 100% mix the filtered image uses only the selected palette; blending with the original introduces intermediate colors. Raster size controls threshold cells, not the resolution of the original image.
+
+Apply the filter to the entire slide (including live 3D, photographs and text) or just the 3D illustration. The floating controls remain outside the effect. SVG compositing performs the postprocessing directly on the live page, so animations and pointer interaction continue without screenshots or a second animation loop. Disabling removes the filter entirely. The chapter-map modal uses the browser's top layer and remains unfiltered. Printing omits the panel and effect.
+
+Source: `dist/dithering.js`, initialized after the renderer. `build-single.py` embeds it into the offline HTML. Tested in desktop Chrome, including mobile viewport layout; full-slide filter performance depends on browser, viewport size and GPU.
+
 The introduction has a slow continuous escalator with a pause button. ENIAC is projected on a cinema screen with animated reels and a pause control. Reduced-motion preferences disable these animations. WebGL rendering uses Three.js; a Canvas 2D projection of the same scene is available when WebGL is unavailable.
 
 The MAF workflow is an illustrative simulation, not a live integration. The interactive field-notes slide replaces the former practical-findings placeholder. It contains five presenter-controlled miniature 3D scenes: manual context migration; explicit subagent roles; Copilot helping to build its own SDK workflow; heartbeat versus real progress; and the coordination bottleneck created by too many agents. On this slide, the arrow keys and footer arrows step through the five lessons before moving to the next slide. This is a qualitative illustration, not a benchmark. The notes panel (N) contains presenter context for each lesson.

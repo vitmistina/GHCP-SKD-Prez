@@ -6,6 +6,7 @@ on:
     paths:
       - 'dist/app.js'
       - 'dist/wardley-scene.js'
+      - 'dist/dithering.js'
       - 'dist/style.css'
       - 'dist/index.html'
       - 'dist/assets/**'
@@ -34,7 +35,9 @@ jobs:
           fetch-depth: 0
 
       - name: Validate presentation JavaScript
-        run: node --input-type=module --check < dist/app.js
+        run: |
+          node --input-type=module --check < dist/app.js
+          node --input-type=module --check < dist/dithering.js
 
       - name: Rebuild standalone offline HTML
         run: |

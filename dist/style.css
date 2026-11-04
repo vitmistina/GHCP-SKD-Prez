@@ -1,3 +1,32 @@
+/* The filter has an opaque backing and a stable viewport-sized coordinate space. */
+#presentation-surface{position:absolute;inset:0;min-height:100vh;background:var(--paper);isolation:isolate}
+#dither-launcher{position:fixed;right:4%;bottom:94px;z-index:20;background:#f5f1e8;padding:10px 17px;font-size:12px;box-shadow:0 3px 16px #292e2c15}
+#dither-launcher[data-enabled="true"]{background:#292e2c;color:#f5f1e8;border-color:#292e2c}
+#dither-panel{position:fixed;right:18px;top:18px;bottom:18px;width:min(350px,calc(100vw - 36px));z-index:30;overflow-y:auto;overscroll-behavior:contain;padding:25px;background:#f8f5ed;color:#292e2c;border:1px solid #c9c5b8;border-radius:14px;box-shadow:0 16px 65px #20282030;font:13px 'DM Sans',sans-serif;scrollbar-width:thin}
+#dither-panel[hidden],#dither-panel [hidden]{display:none!important}
+.dither-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
+.dither-head span{font-size:9px;letter-spacing:2px;color:#777b6c}
+.dither-head h2{font:38px Caveat,cursive;margin:5px 0 0}
+#dither-close{font-size:24px;width:34px;height:34px;flex-shrink:0}
+.dither-switch{display:flex;align-items:center;justify-content:space-between;padding:15px;border:1px solid #d9d5c8;border-radius:8px;background:#eeeadf;margin-bottom:22px;font-weight:600}
+.dither-switch small{display:block;font-size:10px;color:#73766b;font-weight:400;margin-top:4px}
+#dither-enabled{width:22px;height:22px;accent-color:#52674a;cursor:pointer}
+.dither-field{display:block;margin:17px 0 12px;font-size:11px;font-weight:600}
+.dither-field select{display:block;width:100%;margin-top:8px;padding:10px;border:1px solid #cecabb;border-radius:6px;background:#fffdf7;color:#292e2c;font:12px 'DM Sans',sans-serif}
+#dither-swatches{display:flex;flex-wrap:wrap;overflow:hidden;border-radius:5px;min-height:24px;border:1px solid #292e2c20}
+#dither-swatches i{flex:1 0 6%;min-height:12px}
+.dither-help{font-size:10px;line-height:1.65;color:#73766b;margin:9px 0 18px}
+.dither-range{display:block;margin:20px 0}
+.dither-range>span{display:flex;justify-content:space-between;align-items:center;font-size:11px;font-weight:600}
+.dither-range output{font-variant-numeric:tabular-nums;color:#6c715f;font-weight:400}
+.dither-range input{display:block;width:100%;margin:12px 0 0;accent-color:#52674a;cursor:pointer}
+.dither-actions{display:flex;gap:8px;border-top:1px solid #d9d5c8;padding-top:18px;margin-top:22px}
+.dither-actions button{padding:10px 14px;font-size:11px}
+#dither-compare{flex:1;background:#e7ebdf}
+#dither-compare[aria-pressed="true"]{background:#ebc462}
+#dither-panel :is(input,select):focus-visible{outline:3px solid var(--orange);outline-offset:3px}
+@media(max-width:800px){#dither-launcher{right:4%;bottom:85px;padding:8px 12px}#dither-panel{top:10px;right:10px;bottom:10px;width:min(350px,calc(100vw - 20px));padding:20px}}
+@media print{#dither-launcher,#dither-panel{display:none!important}#presentation-surface,#world{filter:none!important}}
 @font-face {
   font-family: 'Caveat';
   font-style: normal;
