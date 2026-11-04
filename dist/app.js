@@ -13,7 +13,7 @@ const slides=[
 {tag:'09 / THE SDK · THE CENTRAL IDEA',title:'Now the harness<br>is <em>callable.</em>',desc:'The agent you direct by hand becomes a component your application can invoke, observe and coordinate.',gain:'Programmatic access to an agent runtime.',cost:'Integration, lifecycle and responsibility for the outcome.',scene:'sdk',label:'your application → SDK → CLI runtime',annotation:'A building block.<br>Not just a chat box.',section:'Architecture',note:'The SDK communicates with the Copilot CLI runtime over JSON-RPC. A C# app is one client. VS Code uses an Agent Host and adapter, not the exact same client path.'},
 {tag:'10 / TWO WAYS IN',title:'One capability.<br><em>Different controls.</em>',desc:'Your code can call the SDK. In VS Code, the Agent Host connects the interface to the Copilot harness.',scene:'architecture',label:'click a layer to inspect it',annotation:'UI ≠ SDK<br>≠ orchestration',section:'Architecture',note:'Use the buttons to show the two entry paths. MAF is optional orchestration above a provider; it is not required for the SDK. Sources: github.com/github/copilot-sdk and code.visualstudio.com/blogs/2026/08/26/agent-host-architecture.'},
 {tag:'11 / MICROSOFT AGENT FRAMEWORK',title:'Delegate work.<br><em>Keep the gates.</em>',desc:'A small workflow: assign a change, let the agent work, run a check, then accept or return it for repair.',scene:'workflow',label:'an illustrative workflow — not a live agent',annotation:'Evidence before<br>“done”.',section:'The demonstration',note:'This is an explanatory simulation, not a connected Copilot run. Replace or follow it with your live MAF demo. Use the failure switch to show why feedback and stopping conditions matter.'},
-{tag:'12 / FROM THE FIELD',title:'What did it<br><em>actually cost?</em>',desc:'The useful review is about where you still intervened: context, tool access, recovery, verification and handover.',scene:'field',label:'observations to collect in Agents Window',annotation:'Bring receipts.',section:'Practical findings',note:'Draft slot for your real experience. Add one success, one failure and the concrete intervention required. Distinguish UI limitations from harness behavior. These are review prompts, not claimed findings.'},
+{tag:'12 / LESSONS FROM THE FIELD',title:'Context was<br><em>already there.</em>',desc:'Memory, preferences and user instructions carried over from the VS Code experience.',scene:'lessons',label:'01 / context survives the move',annotation:'Less setup<br>than expected.',section:'Practical findings',note:'Personal experiment: existing memory, preferences and user instructions worked with the SDK. Do not promise identical loading behavior for every SDK release or session type. This scene has five presenter-controlled lessons.'},
 {tag:'13 / WHERE TO USE IT',title:'Start with a task<br>you can <em>check.</em>',desc:'Good experiments have a clear boundary, accessible tools and visible evidence of completion.',scene:'ideas',label:'choose an experiment',annotation:'Small scope.<br>Strong feedback.',section:'Next experiments',note:'These are candidate experiments, not implemented integrations. Keep the first experiment small enough that you know what success means.'},
 {tag:'14 / THE FACTORY QUESTION',title:'Who will build<br><em>the factory?</em>',desc:'We can assemble workflows ourselves. Which parts will become products — and where will our own design still matter?',scene:'factory',label:'custom craft → reusable product → utility?',annotation:'A hypothesis,<br>not a forecast.',section:'What comes next',note:'A simplified evolution sketch, not a formal Wardley map. Ask what differentiates your business. Avoid predicting a date for universal software factories.'},
 {tag:'15 / YOUR NEXT STEP',title:'Delegate more.<br><em>Own the outcome.</em>',desc:'Pick one bounded task. Define “done”. Give the agent tools. Close the feedback loop. Then measure what you still had to do.',scene:'stairs',label:'the next step is an experiment',annotation:'What will you<br>delegate next?',section:'The invitation',note:'Return to the opening staircase. The take-away is a controlled experiment, not “build a multi-agent system everywhere”.'}
@@ -271,6 +271,139 @@ function animateApollo(dt){
 }
 const apolloEvidence=`<div class="apollo-evidence"><figure><img src="assets/hamilton.jpeg" alt="Margaret Hamilton beside the Apollo flight software listings, 1969"><figcaption><strong>Margaret Hamilton &amp; team</strong><span>Executable flight software</span><code>/scripts</code><a href="https://science.nasa.gov/people/margaret-hamilton/" target="_blank" rel="noopener">MIT / NASA · 1969 ↗</a></figcaption></figure><div class="apollo-checklist"><span>FLIGHT PROCEDURE</span><b>01 &nbsp; Observe state<br>02 &nbsp; Select procedure<br>03 &nbsp; Act &amp; verify</b><code>skill.md</code><small>Illustrative checklist</small></div></div><p class="apollo-caveat">Decisions were distributed across crew, mission control, procedures and software.</p>`;
 
+
+/* Interactive field notes: five low-poly miniature machines, not a bullet list.
+   All claims are qualitative observations, not synthetic performance benchmarks. */
+const lessonBeats=[
+ {title:'Context was<br><em>already there.</em>',desc:'Memory, preferences and user instructions worked when I moved from the VS Code chat harness to the SDK.',finding:'I did not have to rebuild all the context machinery.',tag:'CONTEXT',label:'01 / context survives the move',annotation:'Less setup<br>than expected.',note:'My observation: memory, preferences and user instructions worked. This is an experience report, not a guarantee that all sources load identically on every SDK version or when resuming sessions.'},
+ {title:'Agents needed<br><em>clearer roles.</em>',desc:'Subagents were not simply inherited as an implicit team. I had to declare their roles and boundaries more explicitly.',finding:'Give each specialist a job, tools and a handoff contract.',tag:'DELEGATION',label:'02 / explicit contracts for subagents',annotation:'Declare the<br>crew.',note:'Define a product-owner orchestrator, architect, coder and adversarial reviewer. In the demo, distinguish actual role configuration from imagined autonomous teamwork.'},
+ {title:'Copilot helped<br><em>build Copilot.</em>',desc:'A useful bootstrap: I used GitHub Copilot to write and refine the SDK workflow that would eventually invoke Copilot.',finding:'Use the harness to help engineer its own surrounding workflow.',tag:'BOOTSTRAP',label:'03 / building the machine with the machine',annotation:'A small<br>recursion.',note:'This is a real workflow-building strategy, not a claim that the agent autonomously invented or verified an entire software factory.'},
+ {title:'A heartbeat is<br><em>not progress.</em>',desc:'Long-running work needs a velocity signal, a kaizen-style improvement loop and a way to distinguish activity from actual progress.',finding:'Watch liveness, progress and completion separately.',tag:'OBSERVABILITY',label:'04 / alive is not the same as advancing',annotation:'Heartbeat ≠<br>done.',note:'Track heartbeat and tool activity, but also advancing milestones, attempts, duration and evidence of completion. A session can be alive yet stuck waiting for permission or retrying without improvement.'},
+ {title:'More agents?<br><em>Not always better.</em>',desc:'Each extra agent introduces a handoff, context boundary and coordination cost. A simpler loop can outperform a crowded team.',finding:'Delegate only when specialization beats orchestration overhead.',tag:'ORCHESTRATION',label:'05 / the coordination bottleneck',annotation:'More hands.<br>One bottleneck.',note:'Schematic qualitative illustration, not a performance comparison measured in this project. GitHub has publicly documented that curbing unnecessary subagent delegation can improve reliability and efficiency. Ask what independent capability the extra agent actually adds.'}
+];
+let lessonStep=0,lessonClock=0,lessonActors=[];
+function lessonWorker(x,y,z,col=blue,scale=1){
+ const g=new THREE.Group();g.position.set(x,y,z);g.scale.setScalar(scale);root.add(g);
+ box(.68,.65,.54,col,0,0,0,g);
+ const head=mesh(new THREE.DodecahedronGeometry(.34,0),paper,0,.55,0,g);
+ ball(.055,ink,-.13,.58,.3,g);ball(.055,ink,.13,.58,.3,g);
+ box(.12,.4,.14,ink,-.22,-.52,0,g);box(.12,.4,.14,ink,.22,-.52,0,g);
+ box(.13,.36,.15,gold,-.47,.04,0,g);box(.13,.36,.15,gold,.47,.04,0,g);
+ return g;
+}
+function lessonPacket(a,b,color=orange,phase=0,speed=1){
+ const o=ball(.11,color,...a);lessonActors.push({o,a,b,phase,speed});return o;
+}
+function lessonPlinth(){
+ mesh(new THREE.CylinderGeometry(3.35,3.5,.20,10),0xe5ddcc,0,-1.62,0);
+ mesh(new THREE.CylinderGeometry(3.24,3.34,.075,10),paper,0,-1.49,0);
+ textSprite('F I E L D   N O T E S',0,-1.3,2.22,.36,'#727565');
+}
+function lessonDiorama(){
+ lessonActors=[];lessonClock=0;lessonPlinth();
+ if(lessonStep===0){
+   lessonWorker(1.65,-.12,0,blue,1.35);
+   const rows=[['MEMORY',green,1.16],['PREFS',gold,.12],['INSTRUCTIONS',paper,-.92]];
+   rows.forEach(([name,color,y],i)=>{
+     const x=-1.9;box(1.45,.67,.55,color,x,y,-.2);textSprite(name,x,y+.11,.26,.37);
+     line([[x+.78,y,-.2],[-.15,y,-.2],[.45,.30,0],[.93,.30,0]],0x8d998a);
+     lessonPacket([x+.83,y,.10],[1.15,.3,.15],i===0?green:i===1?gold:orange,i*.28,.25);
+   });
+   ball(.24,gold,1.65,.92,0);
+   textSprite('WORKING CONTEXT',1.45,1.7,0,.45);
+ }
+ if(lessonStep===1){
+   mesh(new THREE.CylinderGeometry(.72,.82,.56,6),gold,0,.05,0);
+   textSprite('PO / ORCH',0,.24,.62,.37);
+   const pods=[[-2.0,.91,'ARCH',blue], [2,.91,'CODER',green],[0,-1.12,'REVIEW',orange]];
+   pods.forEach(([x,y,label,col],i)=>{
+     const p=box(1.22,.62,.82,col,x,y,0);p.rotation.y=(i-1)*.12;
+     textSprite(label,x,y+.13,.54,.4);
+     const mid=[x*.58,y*.58,.08];
+     line([[x*.3,y*.3,.1],mid,[x*.73,y*.73,.1]],0x7a8275);
+     lessonPacket([x*.40,y*.4,.18],[x*.82,y*.82,.18],i===2?orange:gold,i*.24,.22);
+   });
+   textSprite('named roles · bounded handoffs',0,1.8,.1,.48);
+ }
+ if(lessonStep===2){
+   box(5.15,.28,1.55,green,0,-1.13,0);
+   lessonWorker(-2.03,-.18,0,blue,1.15);
+   const armBase=new THREE.Group();armBase.position.set(-.63,-.9,0);root.add(armBase);
+   box(.32,.9,.33,ink,0,.45,0,armBase);
+   const joint=ball(.30,gold,0,1.06,0,armBase);
+   const upper=box(.24,1.65,.24,blue,.73,1.55,0,armBase);upper.rotation.z=-.83;
+   ball(.23,ink,1.39,1.94,0,armBase);
+   const lower=box(.20,1.20,.20,gold,1.66,1.49,0,armBase);lower.rotation.z=.49;
+   line([[1.98,1.1,0],[2.1,.78,0]],ink);
+   const work=box(1.5,.95,.95,paper,1.9,-.52,0);
+   box(1.15,.12,.80,blue,1.9,.07,0);
+   textSprite('SDK',1.9,-.25,.62,.50);
+   for(let j=0;j<3;j++)box(.2,.25,.2,[green,blue,gold][j],1.46+j*.43,.2,0);
+   textSprite('agent builds the scaffold',0,1.95,.1,.53);
+   lessonPacket([-.7,.14,.55],[1.45,.20,.55],orange,.1,.25);
+ }
+ if(lessonStep===3){
+   const ring=[];for(let i=0;i<=60;i++){const t=i/60*Math.PI*2;ring.push([Math.cos(t)*2.05,Math.sin(t)*1.18+.25,.05])}line(ring,0x8c9180);
+   const server=box(1.18,1.47,.9,blue,0,.25,-.16);
+   for(let k=0;k<3;k++){box(.75,.13,.12,k===0?green:k===1?gold:paper,0,.72-k*.37,.35)}
+   const liveness=ball(.13,green,.39,1.05,.45);lessonActors.push({o:liveness,pulse:true});
+   const pulse=lessonPacket([2.05,.25,.2],[-2.05,.25,.2],orange,0,.25);lessonActors[lessonActors.length-1].orbit=true;
+   textSprite('ALIVE',-2.25,1.65,0,.49);
+   textSprite('PROGRESS',2.15,1.65,0,.48);
+   line([[-2.8,-.7,.45],[-2.05,-.7,.45],[-1.85,-.48,.45],[-1.55,-1.0,.45],[-1.3,-.7,.45],[-.55,-.7,.45],[.2,-.7,.45],[.9,-.7,.45],[1.55,-.7,.45],[2.65,-.7,.45]],orange);
+   textSprite('a pulse is not a milestone',0,-1.17,.72,.43);
+ }
+ if(lessonStep===4){
+   // The upper lane has a single well-routed worker. Below, a crowd waits on one gate.
+   box(5.9,.13,.82,green,0,.70,-.6);
+   box(5.9,.13,.82,blue,0,-.88,.55);
+   lessonWorker(-1.65,1.14,-.6,green,.50);
+   for(let i=0;i<5;i++)lessonWorker(-2.25+i*.78,-.43,.55,i%2?blue:gold,.42);
+   const gateTop=box(.19,.95,.70,ink,2.08,1.17,-.6);
+   const gateBottom=box(.19,.95,.70,ink,2.08,-.38,.55);
+   box(.65,.22,.65,green,2.75,.75,-.6);
+   box(.65,.22,.65,orange,2.75,-.84,.55);
+   textSprite('ONE CLEAR HANDOFF',0,2.08,-.6,.43);
+   textSprite('FIVE AGENTS · ONE GATE',0,-1.62,.95,.43);
+   lessonPacket([-2.8,.9,-.2],[2.73,.9,-.2],green,0,.18);
+   for(let i=0;i<5;i++){
+     const p=lessonPacket([-2.7+i*.55,-.7,.95],[1.72,-.7,.95],i%2?gold:orange,i*.15,.20);
+     lessonActors[lessonActors.length-1].queue=true;
+   }
+ }
+ root.rotation.y=-.28;
+}
+function animateLessons(dt){
+ if(reduced||slides[index].scene!=='lessons')return;
+ lessonClock+=dt;
+ for(const a of lessonActors){
+   if(a.pulse){const s=1+.30*Math.sin(lessonClock*3.2);a.o.scale.setScalar(s);continue}
+   if(a.orbit){const t=lessonClock*.42; a.o.position.set(2.05*Math.cos(t),.25+1.18*Math.sin(t),.24);continue}
+   let t=(lessonClock*a.speed+a.phase)%1;
+   if(a.queue)t=Math.min(t*.95,.75);
+   const ease=t*t*(3-2*t);
+   a.o.position.set(a.a[0]+(a.b[0]-a.a[0])*ease,a.a[1]+(a.b[1]-a.a[1])*ease+.08*Math.sin(t*Math.PI),a.a[2]+(a.b[2]-a.a[2])*ease);
+ }
+}
+function showLesson(n){
+ if(slides[index].scene!=='lessons')return;
+ lessonStep=Math.max(0,Math.min(lessonBeats.length-1,n));
+ const b=lessonBeats[lessonStep];
+ $('eyebrow').textContent='12 / FROM VS CODE TO SDK · '+String(lessonStep+1).padStart(2,'0')+' / 05';
+ $('title').innerHTML=b.title;$('description').textContent=b.desc;
+ $('trade').innerHTML='<div class="lesson-takeaway"><span>LESSON LEARNED</span><p></p></div><div class="lesson-progress" aria-label="Lesson progression"></div>';
+ $('trade').querySelector('p').textContent=b.finding;
+ const progress=$('trade').querySelector('.lesson-progress');
+ lessonBeats.forEach((x,i)=>{const control=document.createElement('button');control.type='button';control.textContent=String(i+1).padStart(2,'0');control.setAttribute('aria-label','Show lesson '+(i+1)+': '+x.tag);control.setAttribute('aria-pressed',i===lessonStep?'true':'false');control.className=i===lessonStep?'on':'';control.title=x.tag;control.onclick=()=>showLesson(i);progress.append(control)});
+ $('annotation').innerHTML=b.annotation;
+ $('drawingTitle').textContent=b.label;
+ $('noteText').textContent=b.note;
+ $('interactive').replaceChildren();
+ const prev=button('← Previous',()=>showLesson(lessonStep-1));prev.disabled=lessonStep===0;
+ const next=button('Next lesson →',()=>showLesson(lessonStep+1),true);next.disabled=lessonStep===lessonBeats.length-1;
+ build('lessons');
+}
+
 function build(type){if(!scene)return;if(root){scene.remove(root);root.traverse(o=>{o.geometry?.dispose();if(o.material){o.material.map?.dispose();o.material.dispose()}})}root=new THREE.Group();scene.add(root);objects=[];escalatorSteps=[];cinemaReels=[];cinemaBeam=null;rng=19;spin=targetSpin=0;tilt=targetTilt=0;transition=0;sim=0;auto=false;
 if(type==='stairs')stairs();
 if(type==='eniac')cinema();
@@ -283,7 +416,7 @@ if(type==='brain'){for(let i=0;i<20;i++){const a=i*2.39996;const yy=1-2*i/20;con
 if(type==='harness'){ball(.72,gold,0,0,0);textSprite('model',0,.05,1,.45);['context','tools','permissions','feedback'].forEach((t,i)=>{let a=i*Math.PI/2;let x=Math.cos(a)*2.1,y=Math.sin(a)*1.6;box(1.25,.65,.6,[blue,green,paper,orange][i],x,y,0);textSprite(t,x,y+.12,.5,.36);arrow([x*.65,y*.65,0],[x*.42,y*.42,0])});const pts=[];for(let i=0;i<=80;i++){const a=i/80*Math.PI*2;pts.push([Math.cos(a)*2.65,Math.sin(a)*2.05,-.4])}line(pts,0xaaa78d);objects.push(ball(.13,orange,2.65,0,-.4))}
 if(type==='sdk'||type==='architecture'){const names=type==='sdk'?['your app','SDK','CLI runtime']:['C# / MAF','Copilot SDK','CLI runtime'];for(let i=0;i<3;i++){const x=(i-1)*1.9;box(1.5,1.15,1,[paper,gold,blue][i],x,0,0);textSprite(names[i],x,.1,.7,.38);if(i<2)arrow([x+.8,0,0],[x+1.08,0,0])}textSprite('JSON-RPC',1,1.05,0,.35);if(type==='architecture'){box(2.1,.6,.7,green,-1,1.8,0);textSprite('VS Code → Agent Host',-1,1.9,.55,.39);arrow([-.3,1.45,0],[0,.8,0])}}
 if(type==='workflow'){const points=[[-2,1,0],[.4,1,0],[2,-.7,0],[-1,-1.1,0]];['assign','agent','check','accept / repair'].forEach((t,i)=>{const b=box(1.55,.7,.8,[paper,blue,gold,green][i],...points[i]);objects.push(b);textSprite(t,points[i][0],points[i][1]+.12,.65,.38);if(i)arrow(points[i-1].map((v,k)=>v+(k===2?-.5:0)),points[i].map((v,k)=>v+(k===2?-.5:0)),0xa1a491)});arrow([-1,-.8,-.5],[-2,.5,-.5],orange)}
-if(type==='field'){platform();const board=box(3,3.4,.12,paper,0,.2,0);board.rotation.z=-.06;box(1,.25,.2,gold,0,1.85,.1);for(let i=0;i<4;i++){box(.22,.22,.04,i===0?green:paper,-.95,1.25-i*.65,.15);line([[-.55,1.25-i*.65,.14],[1,1.25-i*.65,.14]])}textSprite('evidence, not vibes',.15,-2,0,.52)}
+if(type==='lessons')lessonDiorama();
 if(type==='ideas'){platform();for(let i=0;i<3;i++){const x=(i-1)*1.7;box(1.3,1.6,.8,[blue,gold,green][i],x,0,0);mesh(new THREE.ConeGeometry(.95,.6,4),paper,x,1.1,0).rotation.y=Math.PI/4;textSprite(['repo review','repair loop','UI testing'][i],x,-1.1,.6,.35)}}
 if(type==='factory'){for(let i=0;i<3;i++){const x=(i-1)*2.1;box(1.6,1+i*.35,1.4,[paper,blue,gold][i],x,-.5+i*.17,0);for(let j=0;j<3;j++)box(.2,.3,.05,ink,x-.45+j*.45,-.35,.73);box(.3,.9,.3,paper,x+.45,.7+i*.35,-.3);textSprite(['custom','product','utility?'][i],x,-1.4,.5,.4);if(i<2)arrow([x+.9,0,0],[x+1.2,0,0])}textSprite('evolution →',0,2,0,.55)}
 root.rotation.y=-.28;}
@@ -291,6 +424,7 @@ function toast(s){$('toast').textContent=s;$('toast').style.opacity=1;setTimeout
 function button(label,fn,primary=false){const b=document.createElement('button');b.textContent=label;if(primary)b.className='primary';b.onclick=fn;$('interactive').append(b);return b}
 const crisisQuotation='<figure class="crisis-quote"><blockquote>“the major cause is... that the machines have become several orders of magnitude more powerful!”</blockquote><figcaption>EDSGER W. DIJKSTRA · <a href="https://www.cs.utexas.edu/~EWD/transcriptions/EWD03xx/!SV-EWD340.html" target="_blank" rel="noopener">THE HUMBLE PROGRAMMER</a> · 1972</figcaption></figure>';
 function update(){const s=slides[index];document.body.dataset.scene=s.scene;escalatorPaused=false;projectionOn=true;$('eyebrow').textContent=s.tag;$('title').innerHTML=s.title;$('description').textContent=s.desc;$('trade').innerHTML=s.scene==='apollo'?apolloEvidence:s.scene==='crisis'?crisisQuotation:s.gain?`<div class="tradeRow"><strong>We delegated</strong><span>${s.gain}</span></div><div class="tradeRow"><strong>We paid with</strong><span>${s.cost}</span></div>`:'';$('drawingTitle').textContent=s.label;$('annotation').innerHTML=s.annotation;$('count').textContent=String(index+1).padStart(2,'0')+' / '+slides.length;$('section').textContent=s.section;$('noteText').textContent=s.note;$('prev').disabled=index===0;$('next').disabled=index===slides.length-1;$('interactive').replaceChildren();$('progress').querySelectorAll('button').forEach((b,i)=>{b.className=i===index?'active':i<index?'past':'';b.setAttribute('aria-current',i===index?'step':'false')});$('chapters').querySelectorAll('button').forEach((b,i)=>b.classList.toggle('active',i===index));build(s.scene);if(index===0){button('Begin the climb ↗',()=>go(1),true);const pause=button(reduced?'Motion reduced':'Pause escalator',()=>{escalatorPaused=!escalatorPaused;pause.textContent=escalatorPaused?'Resume escalator':'Pause escalator'});pause.disabled=reduced;}if(index===1){const lamp=button('Pause projector',()=>{projectionOn=!projectionOn;lamp.textContent=projectionOn?'Pause projector':'Start projector';},true);}if(s.scene==='crisis'){const pause=button(reduced?'Motion reduced':'Pause growth',()=>{crisisPaused=!crisisPaused;pause.textContent=crisisPaused?'Resume growth':'Pause growth';});pause.disabled=reduced;button('↻ Replay growth',()=>{crisisClock=0;crisisPaused=false;pause.textContent='Pause growth';},true);}
+if(s.scene==='lessons'){lessonStep=0;showLesson(0)}
 if(s.scene==='apollo'){const pause=button(reduced?'Motion reduced':'Pause signals',()=>{apolloPaused=!apolloPaused;pause.textContent=apolloPaused?'Resume signals':'Pause signals'});pause.disabled=reduced;button('Next signal →',()=>{apolloClock=(Math.floor(apolloClock/3.6)+1)*3.6;animateApollo(0)});const signal=document.createElement('div');signal.id='apolloSignal';$('interactive').append(signal);apolloStage=-1;animateApollo(0);}
 if(s.scene==='harness'){button('Run the loop ↻',()=>{auto=!auto;toast(auto?'Observe → act → check → repeat':'Loop paused')},true)}if(s.scene==='architecture'){['C# / MAF','VS Code','Runtime'].forEach((v,i)=>button(v,()=>{selectedPath=i;const desc=['C# application → optional MAF orchestration → Copilot SDK → CLI runtime.','VS Code Agents Window → Agent Host → Copilot SDK adapter → runtime.','The CLI runtime executes the agent loop. The SDK exposes programmatic control over JSON-RPC.'];$('description').textContent=desc[i];targetSpin=[-.35,.25,.7][i];$('interactive').querySelectorAll('button').forEach((b,j)=>b.classList.toggle('active',j===i))}))}if(s.scene==='workflow'){button('▶ Run workflow',()=>{sim=1;simStart=performance.now();simStatus='';},true);const b=button('Check fails: OFF',()=>{fail=!fail;b.textContent='Check fails: '+(fail?'ON':'OFF');b.classList.toggle('active',fail)})}if(s.scene==='ideas'){const ds=['Review a bounded repository change against explicit architectural rules. Output findings with file-level evidence.','Fix one failing test in an isolated workspace. Stop after a bounded number of attempts and report the evidence.','Exercise one user journey in a browser. Record what failed, propose a change and verify the same journey again.'];['Repo review','Repair loop','UI test'].forEach((l,i)=>button(l,()=>{$('description').textContent=ds[i];targetSpin=(i-1)*.4}))}if(index===slides.length-1){button('Back to the staircase ↺',()=>go(0),true);button('Open chapter map',()=>showMap())}if(!reduced)$('copy').animate([{opacity:0,transform:'translateY(12px)'},{opacity:1,transform:'translateY(0)'}],{duration:450,easing:'ease-out'});history.replaceState(null,'','#'+index)}
 function go(n){index=Math.max(0,Math.min(slides.length-1,n));update()}function showMap(){$('map').showModal()}function toggleNotes(){$('notes').hidden=!$('notes').hidden}
@@ -333,4 +467,5 @@ update();document.fonts.ready.then(()=>build(slides[index].scene));let escalator
  if(index===1){cinemaReels.forEach(r=>{if(projectionOn&&!reduced)r.rotation.y+=dt*.6});if(cinemaBeam){cinemaBeam.visible=projectionOn;cinemaBeam.material.opacity=.055+(reduced?0:Math.sin(now*.0014)*.007)}}
 if(slides[index].scene==='crisis')animateCrisis(now,dt);
 if(slides[index].scene==='apollo')animateApollo(dt);
+ if(slides[index].scene==='lessons')animateLessons(dt);
 if(slides[index].scene==='harness'&&auto&&objects[0]){const a=now*.001;objects[0].position.set(Math.cos(a)*2.65,Math.sin(a)*2.05,-.4)}if(slides[index].scene==='brain'&&!reduced)objects.forEach((o,i)=>o.scale.setScalar(1+Math.sin(now*.001+i)*.1));if(slides[index].scene==='eniac'&&!reduced)objects.forEach((o,i)=>o.material.emissive.setHex(Math.sin(now*.002+i)> .8?0x443300:0));if(slides[index].scene==='workflow'&&sim){let stage=Math.floor((now-simStart)/1200);const seq=fail?[0,1,2,3,1,2,3]:[0,1,2,3];const msgs=fail?['Assigning a bounded change','Agent edits the workspace','Check failed: evidence returned','Repair requested · attempt 2 of 2','Agent applies a repair','Check passes','Accepted with evidence']:['Assigning a bounded change','Agent edits the workspace','Check passes','Accepted with evidence'];if(stage<seq.length){objects.forEach((o,i)=>o.scale.setScalar(i===seq[stage]?1.1:1));if(simStatus!==msgs[stage]){$('drawingTitle').textContent=msgs[stage];simStatus=msgs[stage]}}else{sim=0;objects.forEach(o=>o.scale.setScalar(1));$('drawingTitle').textContent='Done. Outcome checked, not merely asserted.'}}renderer.render(scene,camera)}requestAnimationFrame(frame);
