@@ -405,9 +405,7 @@ function animateLessons(dt){
    if(a.queue)t=Math.min(t*.95,.75);
    if(a.manual){
      // Staged journey: pause at the magnifier and porting bench.
-     const p=t<.37?(t/.37)*.34:t<.63?.34+(t-.37)/.26*.32:.66+(t-.63)/.37*.34;
-     const hold=(t>.27&&t<.37)||(t>.56&&t<.63);
-     const eased=hold?(t<.5?.34:.66):p;
+     const eased=t<.35?(t/.35)*.38:t<.49?.38:t<.90?.38+(t-.49)/.41*.62:1;
      a.o.position.set(a.a[0]+(a.b[0]-a.a[0])*eased,a.a[1]+(a.b[1]-a.a[1])*eased+Math.sin(t*Math.PI)*.22,a.a[2]+(a.b[2]-a.a[2])*eased);
      continue;
    }
