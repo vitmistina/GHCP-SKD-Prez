@@ -16,7 +16,7 @@ Arrow keys / Space: navigate. M: chapter map. N: speaker notes. F: full screen. 
 
 The introduction has a slow continuous escalator with a pause button. ENIAC is projected on a cinema screen with animated reels and a pause control. Reduced-motion preferences disable these animations. WebGL rendering uses Three.js; a Canvas 2D projection of the same scene is available when WebGL is unavailable.
 
-The MAF workflow is an illustrative simulation, not a live integration. The practical-findings slide is a draft for the presenter’s observations.
+The MAF workflow is an illustrative simulation, not a live integration. The interactive field-notes slide replaces the former practical-findings placeholder. It contains five presenter-controlled miniature 3D scenes: context inheritance; explicit subagent roles; Copilot helping to build its own SDK workflow; heartbeat versus real progress; and the coordination bottleneck created by too many agents. On this slide, the arrow keys and footer arrows step through the five lessons before moving to the next slide. This is a qualitative illustration, not a benchmark. The notes panel (N) contains presenter context for each lesson.
 
 ## Assets
 
@@ -35,3 +35,7 @@ The on-slide quotation is an exact excerpt from Edsger W. Dijkstra, [*The Humble
 The Apollo scene follows the circular sketch: spacecraft → mission control → crew → DSKY / AGC → spacecraft. Four sequential, visibly different packets carry telemetry, instructions, verb/noun input and control. Pause or advance the signal with the on-slide controls; reduced motion shows stationary packets. The CSM and astronaut are deliberately simplified low-poly models. This is a pedagogical analogy, not a literal flight-control sequence: DSKY is the interface to the AGC, and decisions were distributed.
 
 The photograph of Margaret Hamilton beside her team's Apollo flight software listings (1969) is bundled in `dist/assets/hamilton.jpeg`, from [NASA Science](https://science.nasa.gov/people/margaret-hamilton/). The adjacent procedure card is an illustrative checklist, not an archival flight-plan image. `/scripts` and `skill.md` are contemporary analogies. Both the photo and the scene are embedded in the standalone HTML.
+
+## Standalone HTML build
+
+The editable web version lives in `dist/index.html` plus `dist/app.js` and `dist/style.css`. An Actions workflow, `.github/workflows/build-standalone.yml`, runs `python3 build-single.py` when these files change and commits an updated `dist/presentation.html` on `main`. It also supports manual dispatch. If Actions are disabled, run the build locally before sharing the offline export.
