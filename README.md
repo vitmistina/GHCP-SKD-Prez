@@ -40,6 +40,14 @@ The photograph of Margaret Hamilton beside her team's Apollo flight software lis
 
 The editable web version lives in `dist/index.html` plus `dist/app.js` and `dist/style.css`. An Actions workflow, `.github/workflows/build-standalone.yml`, runs `python3 build-single.py` when these files change and commits an updated `dist/presentation.html` on `main`. It also supports manual dispatch. If Actions are disabled, run the build locally before sharing the offline export.
 
+## Two bridges to the closing prediction
+
+Immediately after the five hands-on lessons, the presentation now has two animated low-poly scenes.
+
+**SDK alternatives: "The SDK did not invent the loop."** Three lanes show a hand-built LLM/tool loop, scripted non-interactive Copilot CLI, and packaged coding-agent SDKs (Copilot, Claude and Codex). Click each lane's button to focus its engineering trade-off; pause the animated signals if helpful. This compares architectural approaches, not product parity or performance. Reference documentation: [Copilot SDK](https://github.com/github/copilot-sdk), [CLI automation](https://docs.github.com/en/copilot/how-tos/copilot-cli/automate-copilot-cli/run-cli-programmatically), [Claude Agent SDK](https://platform.claude.com/docs/en/agent-sdk/overview), [Codex SDK](https://developers.openai.com/codex/sdk/).
+
+**Deterministic limits, stochastic work.** A precise state machine and enforceable rule-count, budget and retry limits face an exploratory agent landscape, connected through a policy gate. Toggle "Within limits" versus "Over budget" to see an allowed proposal or a rejected one. The host can bound tool calls, budgets and state transitions, but admission by policy is not proof of the agent's answer being correct. This is an illustrative simulation, not a live SDK demo.
+
 ## Closing Wardley-inspired 3D map
 
 The final slide, after the five field notes, uses Three.js low-poly models on a physical four-column Wardley-inspired map. It shows the compiler and managed-memory evolution, a custom harness, the **software factory in Genesis today**, and a **red dashed prediction** toward a few mainstream products (not automatically commodities).

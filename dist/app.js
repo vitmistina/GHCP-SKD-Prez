@@ -12,7 +12,10 @@ const slides=[
 {tag:'07 / ONE AGENT, MANY PLUGS',title:'One agent.<br><em>Many plugs.</em>',desc:'The Copilot CLI is a general-purpose agent: it uses the terminal, the file system and writes its own scripts. The SDK is the power strip — plug in any experience you want to build.',scene:'powerstrip',label:'CLI runtime → SDK → your experience',annotation:'One agent.<br>Plug it in anywhere.',section:'Architecture',note:'The SDK communicates with the Copilot CLI runtime over JSON-RPC. You can talk to the CLI directly in the terminal. Through the SDK (JSON-RPC to the CLI runtime) the same agent powers your own C#/Python program, the VS Code Agent window and the Copilot App. The empty socket is the invitation: what would you plug in? Sources: github.com/github/copilot-sdk.'},
 {tag:'08 / WHERE YOU MEET IT',title:'Four places<br>to <em>plug in.</em>',desc:'The same agent already shows up in tools you use — and in your own code. Three are available today; one is waiting for approval.',scene:'places',label:'available today: 3 · pending approval: 1',annotation:'Already on<br>your desk.',section:'In practice',note:'Four practical entry points. (1) VS Code Agent Window: the icon in the title bar opens it. (2) The harness picker in VS Code chat: "Copilot" is the Copilot SDK harness, "Local" is the original Copilot Chat, "Cloud" does not work in NN yet. (3) Your own code: a small C# program using the GitHub.Copilot SDK — one CopilotClient, two agents (an implementer and a reviewer called Steve), and a live view in VS Code through the experimental Agent Host Protocol. (4) The GitHub Copilot app: an agent-native desktop app, currently in the approval process at the Engineering Standards Board, so not available in NN yet.'},
 {tag:'09 / LESSONS FROM THE FIELD',title:'Context needed<br><em>a migration.</em>',desc:'Moving from the VS Code chat harness to the SDK meant hunting down memory, preferences and user instructions, then reconnecting them.',scene:'lessons',label:'01 / manually carrying the context across',annotation:'Not a<br>free transfer.',section:'Practical findings',note:'My actual experience: memory, preferences and user instructions did not simply follow automatically between VS Code and my SDK workflow. Their locations and configuration required investigation and migration work. This is my concrete setup, not a universal claim about every SDK configuration.'},
-{tag:'10 / THE NEXT ABSTRACTION · A PREDICTION',title:'The factory is<br>still <em>hand-built.</em>',desc:'Compilers and managed memory became widely available infrastructure. Harnesses are moving from custom builds towards products. My prediction: we have a brief window to build software factories ourselves before a handful of mainstream implementations package the common patterns.',scene:'wardley',label:'evolution → productisation?',annotation:'Our last<br>DIY window?',section:'Where this leads',note:'A Wardley-inspired conceptual map, NOT measured market data. Horizontal means evolutionary maturity, NOT chronological time. Vertical is relative visibility in the user value chain. Compiler and managed memory are simplified historical analogies; not all compilers or runtimes are commodities. The harness is an emerging mix of products and bespoke configuration. Software factory TODAY sits in Genesis on this map; the RED DASHED arrow to a few mainstream products is my prediction only. Productisation does not guarantee commoditisation and organisation-specific factories may remain custom-built.'},
+
+{tag:'10 / MORE THAN ONE WAY',title:'The SDK did not<br><em>invent the loop.</em>',desc:'It was possible before: assemble an agent loop over an LLM API, script an existing CLI, or call a packaged agent harness. Copilot is not the only SDK in town.',scene:'sdkpaths',label:'three roads to a programmable agent',annotation:'Possible before.<br>Practical now.',section:'Put it in perspective',note:'Do not claim the SDK invented programmable agents. A hand-built LLM/tool loop is the most flexible and most operational work; non-interactive CLI with prompt and JSONL output is scriptable; a coding-agent SDK exposes a packaged runtime and richer programmatic control. Other relevant options include Anthropic Claude Agent SDK and OpenAI Codex SDK. Different SDKs have different contracts and are not interchangeable. Official references: https://github.com/github/copilot-sdk , https://docs.github.com/en/copilot/how-tos/copilot-cli/automate-copilot-cli/run-cli-programmatically , https://platform.claude.com/docs/en/agent-sdk/overview , https://developers.openai.com/codex/sdk/ .'},
+{tag:'11 / A BOUNDARY, NOT A PROMPT',title:'Deterministic limits.<br><em>Stochastic work.</em>',desc:'My program owns the state machine, allowed transitions, rule-count limits, tool permissions, budgets and stopping conditions. Inside those boundaries, an agent explores solutions. The boundary can reject an action, not guarantee the answer.',scene:'boundaries',label:'constraints outside · exploration inside',annotation:'Freedom inside.<br>Control at the edge.',section:'What I actually build',note:'Separate two layers rigorously. The agent is nondeterministic: outputs and plans vary. The host application can enforce deterministic invariants before tool calls, after results and during state transitions: budget caps, rule-count limits, retries, timeouts, allowlists and valid state transitions. Prompt-only rules are not hard guardrails. An allowed transition is not equivalent to an accurate, secure or correct result. The animation illustrates a proposed action reaching the gate: within policy is admitted; over-budget is blocked, without changing the state machine. Both cases are conceptual simulations, not a live agent run.'},
+{tag:'12 / THE NEXT ABSTRACTION · A PREDICTION',title:'The factory is<br>still <em>hand-built.</em>',desc:'Compilers and managed memory became widely available infrastructure. Harnesses are moving from custom builds towards products. My prediction: we have a brief window to build software factories ourselves before a handful of mainstream implementations package the common patterns.',scene:'wardley',label:'evolution → productisation?',annotation:'Our last<br>DIY window?',section:'Where this leads',note:'A Wardley-inspired conceptual map, NOT measured market data. Horizontal means evolutionary maturity, NOT chronological time. Vertical is relative visibility in the user value chain. Compiler and managed memory are simplified historical analogies; not all compilers or runtimes are commodities. The harness is an emerging mix of products and bespoke configuration. Software factory TODAY sits in Genesis on this map; the RED DASHED arrow to a few mainstream products is my prediction only. Productisation does not guarantee commoditisation and organisation-specific factories may remain custom-built.'},
 ];
 const eniacPhoto=new Image();eniacPhoto.src='assets/eniac.jpeg';
 let escalatorSteps=[], cinemaReels=[], cinemaBeam=null, escalatorPaused=false, projectionOn=true;
@@ -523,6 +526,149 @@ function animatePowerStrip(now,dt){
  if(powerGhost)powerGhost.opacity=reduced?.5:.3+Math.max(0,Math.sin(now*.0018+1.1))**2*.5;
 }
 
+
+// Scene 10: three genuinely different implementation paths, all leading to agentic work.
+// Paths are conceptual, not a feature-for-feature comparison or a benchmark.
+let sdkClock=0,sdkPaused=false,sdkSelected=-1,sdkTokens=[],sdkStages=[];
+function buildSdkPaths(){
+ sdkClock=0;sdkPaused=false;sdkSelected=-1;sdkTokens=[];sdkStages=[];
+ const xs=[-2.36,0,2.36],cs=[blue,gold,green];
+ const names=['DIY · LLM API','SCRIPT · CLI','AGENT · SDK'];
+ const foot=['own the loop','parse + orchestrate','reuse the harness'];
+ for(let i=0;i<3;i++){
+  const x=xs[i],stage=box(2.07,.15,3.45,0xe8e2d5,x,-1.77,0);
+  stage.rotation.y=(i-1)*.015;sdkStages.push(stage);
+  box(1.91,.075,.11,cs[i],x,-1.66,1.61);
+  textSprite(names[i],x,2.0,0,.39);
+  textSprite(foot[i],x,-2.22,.65,.34,'#626960');
+  line([[x-1,-1.67,-1.67],[x+1,-1.67,-1.67]],ink);
+  let curve;
+  if(i===0){
+   box(.74,.65,.64,blue,x-.49,-.93,-.93);
+   ball(.27,paper,x-.49,-.45,-.93);
+   textSprite('model',x-.49,-.12,-.85,.26);
+   box(.65,.44,.62,paper,x+.5,-1.02,-.93);
+   box(.65,.44,.62,green,x+.5,-.37,-.93);
+   textSprite('tools',x+.5,-.07,-.83,.26);
+   for(let j=0;j<4;j++){const y=-.86+j*.4;line([[x-.1,y,-.75],[x+.12,y+.13,-.75]],0xb9785c);}
+   box(1.48,.19,.82,0xdfd5c3,x,-1.38,.5);
+   for(let j=0;j<4;j++)box(.2,.055,.31,ink,x-.51+j*.34,-1.24,.65);
+   textSprite('your loop',x,-1.02,1.13,.33);
+   curve=new THREE.CatmullRomCurve3([[x-.5,-.47,-.65],[x+.51,-.35,-.65],[x+.5,-1.1,.12],[x-.55,-1.2,.5],[x-.5,-.47,-.65]].map(v=>new THREE.Vector3(...v)),true);
+  }else if(i===1){
+   const terminal=box(1.47,1.05,.37,ink,x,-.51,-.82);
+   box(1.29,.83,.052,0xdce8e1,x,-.48,-.598);
+   textSprite('copilot -p',x,-.49,-.51,.28,'#334036');
+   box(1.15,.17,.65,paper,x,-1.24,-.65);
+   for(let j=0;j<4;j++)box(.15,.038,.19,ink,x-.38+j*.25,-1.13,-.46);
+   box(1.22,.13,.66,gold,x,-1.46,.69);
+   textSprite('JSONL output',x,-1.17,1.15,.29);
+   for(let j=0;j<3;j++)box(.1,.09,.17,[blue,orange,green][j],x-.36+j*.36,-1.34,1.01);
+   curve=new THREE.CatmullRomCurve3([[x,-.31,-.48],[x+.66,-.4,-.12],[x+.66,-1.35,.55],[x,-1.27,1.04],[x,-.31,-.48]].map(v=>new THREE.Vector3(...v)),true);
+  }else{
+   box(1.52,.28,.82,0xdad5c7,x,-1.47,.72);
+   textSprite('runtime',x,-1.18,1.23,.28);
+   ['Copilot','Claude','Codex'].forEach((n,j)=>{
+    const y=-1.0+j*.66;
+    box(1.37,.42,.76,[green,blue,gold][j],x,y,-.58);
+    box(.11,.12,.17,orange,x-.51,y+.04,-.14);
+    textSprite(n,x+.12,y+.05,-.09,.28);
+   });
+   curve=new THREE.CatmullRomCurve3([[x,-.99,-.02],[x+.55,-.5,.3],[x+.24,-1.35,.85],[x-.55,-.25,.18],[x,-.99,-.02]].map(v=>new THREE.Vector3(...v)),true);
+  }
+  const route=curve.getPoints(55).map(p=>p.toArray());
+  line(route,cs[i]);
+  const token=ball(.11,orange);token.children.forEach(e=>e.visible=false);
+  sdkTokens.push({token,curve,i});
+  const result=box(.46,.46,.46,cs[i],x,1.08,.08);result.rotation.y=Math.PI/4;
+  textSprite('agent',x,1.48,.6,.30);
+ }
+}
+function selectSdkPath(i){sdkSelected=i;sdkClock=0;}
+function animateSdkPaths(dt){
+ if(!reduced&&!sdkPaused)sdkClock+=dt;
+ sdkTokens.forEach(({token,curve,i})=>{
+  const u=reduced?.45:((sdkClock*.15+i*.28)%1);
+  token.position.copy(curve.getPointAt(u));token.position.y+=.13;
+  token.scale.setScalar(sdkSelected<0||sdkSelected===i?1.2:.58);
+ });
+ sdkStages.forEach((stage,i)=>{
+  const chosen=sdkSelected<0||sdkSelected===i;
+  stage.material.color.setHex(chosen?0xe8e2d5:0xd6d2ca);
+  stage.position.y=-1.77+(chosen&&!reduced?Math.sin(sdkClock*1.1+i)*.015:0);
+ });
+}
+
+// Scene 11: a rigid policy/state-machine controller beside exploratory agent work.
+// Green means a policy test admitted a proposed transition, NOT the answer was correct.
+let boundaryClock=0,boundaryPaused=false,boundaryBlocked=false,boundaryPacket=null,boundaryGate=[],boundaryNodes=[],boundaryRoute=null;
+function buildBoundaries(){
+ boundaryClock=0;boundaryPaused=false;boundaryBlocked=false;boundaryGate=[];boundaryNodes=[];
+ // Deterministic controller, shaped as a clockwork machine.
+ box(2.55,.15,3.17,0xe0e7df,-2.25,-1.85,0);
+ const wall=box(2.25,2.23,.22,blue,-2.25,-.42,-.84);
+ box(2.35,.16,.48,ink,-2.25,-1.5,-.7);
+ textSprite('STATE MACHINE',-2.25,1.55,-.7,.38);
+ const nodes=[[-2.76,.08,'READY'],[-1.73,.08,'RUN'],[-2.76,-.91,'VERIFY'],[-1.73,-.91,'DONE']];
+ nodes.forEach(([x,y,name],i)=>{
+  const tile=box(.86,.6,.12,[paper,gold,green,paper][i],x,y,-.65);
+  textSprite(name,x,y+.1,-.47,.25);
+  boundaryNodes.push(tile);
+ });
+ line([[-2.35,.14,-.42],[-2.13,.14,-.42]],ink);
+ line([[-1.67,-.24,-.42],[-1.67,-.53,-.42]],ink);
+ line([[-2.12,-.9,-.42],[-2.37,-.9,-.42]],ink);
+ // Three enforceable constraint tokens: policy, cost, attempts.
+ ['RULE CAP','BUDGET','RETRIES'].forEach((name,i)=>{
+  const x=-3.08+i*.83;
+  box(.72,.36,.67,[green,gold,orange][i],x,-1.48,.83);
+  textSprite(name,x,-1.17,1.24,.26);
+ });
+ // Guarded crossing at x ~= 0, between agent proposal and host state.
+ box(1.04,.16,1.48,0xe3e0d7,0,-1.84,.09);
+ for(let x of [-.46,.46])box(.18,2.08,.24,ink,x,-.66,.04);
+ box(1.15,.2,.33,ink,0,.43,.04);
+ const light=box(.48,.46,.14,green,0,.03,.26);
+ boundaryGate.push(light);
+ textSprite('POLICY',0,.94,0,.42);
+ textSprite('gate',0,-1.98,1.1,.32);
+ // Agent landscape: paths diverge; all tool requests still cross the same gate.
+ box(2.53,.15,3.18,0xe9dfcf,2.22,-1.85,0);
+ textSprite('AGENT',2.2,1.55,-.45,.46);
+ const coords=[];
+ for(let i=0;i<14;i++){
+  const phi=i*2.399963;
+  const r=.32+Math.sqrt(i/14)*.92;
+  const x=2.2+Math.cos(phi)*r;
+  const y=-.39+Math.sin(phi)*r*.86;
+  const z=-.45+(i%3)*.25;
+  const b=ball(i%4===0?.19:.13,i%3?gold:orange,x,y,z);
+  boundaryNodes.push(b);
+  coords.push([x,y,z]);
+  if(i>0&&i%4!==0)line([coords[Math.max(0,i-1)],coords[i]],0xb88e69);
+ }
+ ball(.31,gold,2.22,-.35,.12);
+ textSprite('propose',2.28,-1.34,1.2,.33);
+ // A proposal travels to the policy gate; the deterministic host decides.
+ boundaryRoute=new THREE.CatmullRomCurve3([[2.18,-.33,.55],[1.23,-.15,.72],[.32,-.25,.65],[-.5,-.32,.73],[-1.4,-.6,.86]].map(v=>new THREE.Vector3(...v)));
+ line([[2.18,-.33,.55],[1.23,-.15,.72],[.32,-.25,.65],[-.5,-.32,.73],[-1.4,-.6,.86]],0x9eab8f);
+ boundaryPacket=ball(.15,orange);boundaryPacket.children.forEach(o=>o.visible=false);
+}
+function setBoundaryBlocked(v){boundaryBlocked=!!v;boundaryClock=0;}
+function boundaryStatus(){
+ if(boundaryBlocked)return 'DENIED · over budget. No state transition.';
+ return 'ADMITTED · transition allowed. Result still needs verification.';
+}
+function animateBoundaries(dt){
+ if(!reduced&&!boundaryPaused)boundaryClock+=dt;
+ const phase=reduced?.78:(boundaryClock*.17)%1;
+ const at=boundaryBlocked?(phase<.6?phase/.6*.49:.49-(phase-.6)/.4*.49):phase;
+ boundaryPacket.position.copy(boundaryRoute.getPointAt(Math.max(0,Math.min(1,at))));
+ boundaryPacket.scale.setScalar(1+(reduced?0:Math.sin(boundaryClock*5)*.12));
+ boundaryGate.forEach(o=>o.material.color.setHex(boundaryBlocked?0xc86451:0xc3d1ad));
+ boundaryNodes.forEach((o,i)=>{if(i>=4&&!reduced)o.rotation.y=Math.sin(boundaryClock*.7+i*1.7)*.06;});
+}
+
 let wardleyScene=null;
 function build(type){if(!scene)return;wardleyScene=null;if(root){scene.remove(root);root.traverse(o=>{o.geometry?.dispose();if(o.material){o.material.map?.dispose();o.material.dispose()}})}root=new THREE.Group();scene.add(root);objects=[];escalatorSteps=[];cinemaReels=[];cinemaBeam=null;rng=19;spin=targetSpin=0;tilt=targetTilt=0;transition=0;sim=0;auto=false;
 if(type==='stairs')stairs();
@@ -538,6 +684,8 @@ if(type==='harness'){ball(.72,gold,0,0,0);textSprite('model',0,.05,1,.45);['cont
 if(type==='sdk'||type==='architecture'){const names=type==='sdk'?['your app','SDK','CLI runtime']:['C# / MAF','Copilot SDK','CLI runtime'];for(let i=0;i<3;i++){const x=(i-1)*1.9;box(1.5,1.15,1,[paper,gold,blue][i],x,0,0);textSprite(names[i],x,.1,.7,.38);if(i<2)arrow([x+.8,0,0],[x+1.08,0,0])}textSprite('JSON-RPC',1,1.05,0,.35);if(type==='architecture'){box(2.1,.6,.7,green,-1,1.8,0);textSprite('VS Code → Agent Host',-1,1.9,.55,.39);arrow([-.3,1.45,0],[0,.8,0])}}
 if(type==='workflow'){const points=[[-2,1,0],[.4,1,0],[2,-.7,0],[-1,-1.1,0]];['assign','agent','check','accept / repair'].forEach((t,i)=>{const b=box(1.55,.7,.8,[paper,blue,gold,green][i],...points[i]);objects.push(b);textSprite(t,points[i][0],points[i][1]+.12,.65,.38);if(i)arrow(points[i-1].map((v,k)=>v+(k===2?-.5:0)),points[i].map((v,k)=>v+(k===2?-.5:0)),0xa1a491)});arrow([-1,-.8,-.5],[-2,.5,-.5],orange)}
 if(type==='lessons')lessonDiorama();
+if(type==='sdkpaths')buildSdkPaths();
+if(type==='boundaries')buildBoundaries();
 if(type==='wardley')wardleyScene=createWardley({THREE,root,box,mesh,line,ball,textSprite,reduced,ink,paper,blue,green,gold,orange});
 if(type==='ideas'){platform();for(let i=0;i<3;i++){const x=(i-1)*1.7;box(1.3,1.6,.8,[blue,gold,green][i],x,0,0);mesh(new THREE.ConeGeometry(.95,.6,4),paper,x,1.1,0).rotation.y=Math.PI/4;textSprite(['repo review','repair loop','UI testing'][i],x,-1.1,.6,.35)}}
 if(type==='factory'){for(let i=0;i<3;i++){const x=(i-1)*2.1;box(1.6,1+i*.35,1.4,[paper,blue,gold][i],x,-.5+i*.17,0);for(let j=0;j<3;j++)box(.2,.3,.05,ink,x-.45+j*.45,-.35,.73);box(.3,.9,.3,paper,x+.45,.7+i*.35,-.3);textSprite(['custom','product','utility?'][i],x,-1.4,.5,.4);if(i<2)arrow([x+.9,0,0],[x+1.2,0,0])}textSprite('evolution →',0,2,0,.55)}
@@ -548,6 +696,8 @@ const wardleyThesis='<div class="wardley-thesis"><strong>MY PREDICTION</strong><
 const crisisQuotation='<figure class="crisis-quote"><blockquote>“the major cause is... that the machines have become several orders of magnitude more powerful!”</blockquote><figcaption>EDSGER W. DIJKSTRA · <a href="https://www.cs.utexas.edu/~EWD/transcriptions/EWD03xx/!SV-EWD340.html" target="_blank" rel="noopener">THE HUMBLE PROGRAMMER</a> · 1972</figcaption></figure>';
 function update(){const s=slides[index];document.body.dataset.scene=s.scene;escalatorPaused=false;projectionOn=true;$('eyebrow').textContent=s.tag;$('title').innerHTML=s.title;$('description').textContent=s.desc;$('trade').innerHTML=s.scene==='apollo'?apolloEvidence:s.scene==='crisis'?crisisQuotation:s.scene==='wardley'?wardleyThesis:s.gain?`<div class="tradeRow"><strong>We delegated</strong><span>${s.gain}</span></div><div class="tradeRow"><strong>We paid with</strong><span>${s.cost}</span></div>`:'';placesBoard.innerHTML=s.scene==='places'?placesCards:'';$('drawingTitle').textContent=s.label;$('annotation').innerHTML=s.annotation;$('count').textContent=String(index+1).padStart(2,'0')+' / '+String(slides.length).padStart(2,'0');$('section').textContent=s.section;$('noteText').textContent=s.note;$('prev').disabled=index===0;$('next').disabled=index===slides.length-1;$('interactive').replaceChildren();$('progress').querySelectorAll('button').forEach((b,i)=>{b.className=i===index?'active':i<index?'past':'';b.setAttribute('aria-current',i===index?'step':'false')});$('chapters').querySelectorAll('button').forEach((b,i)=>b.classList.toggle('active',i===index));build(s.scene);if(index===0){button('Begin the climb ↗',()=>go(1),true);const pause=button(reduced?'Motion reduced':'Pause escalator',()=>{escalatorPaused=!escalatorPaused;pause.textContent=escalatorPaused?'Resume escalator':'Pause escalator'});pause.disabled=reduced;}if(index===1){const lamp=button('Pause projector',()=>{projectionOn=!projectionOn;lamp.textContent=projectionOn?'Pause projector':'Start projector';},true);}if(s.scene==='crisis'){const pause=button(reduced?'Motion reduced':'Pause growth',()=>{crisisPaused=!crisisPaused;pause.textContent=crisisPaused?'Resume growth':'Pause growth';});pause.disabled=reduced;button('↻ Replay growth',()=>{crisisClock=0;crisisPaused=false;pause.textContent='Pause growth';},true);}
 if(s.scene==='lessons'){lessonStep=0;showLesson(0)}
+if(s.scene==='sdkpaths'){['DIY loop','CLI script','Agent SDK'].forEach((name,i)=>button(name,()=>{selectSdkPath(i);$('description').textContent=[ 'Build the model/tool loop yourself: maximum control, but you own context, tools, retries and lifecycle.', 'Invoke an existing coding agent with a non-interactive CLI; parse its output and orchestrate calls from your script.', 'Call a packaged coding-agent harness through a programmatic API. Copilot, Claude and Codex each provide an SDK.' ][i];}));const p=button(reduced?'Motion reduced':'Pause signals',()=>{sdkPaused=!sdkPaused;p.textContent=sdkPaused?'Resume signals':'Pause signals'});p.disabled=reduced;}
+if(s.scene==='boundaries'){const info=document.createElement('p');info.className='boundary-status';info.id='boundaryStatus';$('interactive').append(info);button('✓ Within limits',()=>{setBoundaryBlocked(false);info.textContent=boundaryStatus();},true);button('× Over budget',()=>{setBoundaryBlocked(true);info.textContent=boundaryStatus();});const p=button(reduced?'Motion reduced':'Pause proposal',()=>{boundaryPaused=!boundaryPaused;p.textContent=boundaryPaused?'Resume proposal':'Pause proposal'});p.disabled=reduced;info.textContent=boundaryStatus();}
 if(s.scene==='wardley'){const pause=button(reduced?'Motion reduced':'Pause evolution',()=>{pause.textContent=wardleyScene.togglePause()?'Resume evolution':'Pause evolution'});pause.disabled=reduced;button('↻ Replay',()=>{wardleyScene.replay();pause.textContent='Pause evolution'},true);button('Next beat →',()=>wardleyScene.nextBeat())}
 if(s.scene==='apollo'){const pause=button(reduced?'Motion reduced':'Pause signals',()=>{apolloPaused=!apolloPaused;pause.textContent=apolloPaused?'Resume signals':'Pause signals'});pause.disabled=reduced;button('Next signal →',()=>{apolloClock=(Math.floor(apolloClock/3.6)+1)*3.6;animateApollo(0)});const signal=document.createElement('div');signal.id='apolloSignal';$('interactive').append(signal);apolloStage=-1;animateApollo(0);}
 if(s.scene==='harness'){button('Run the loop ↻',()=>{auto=!auto;toast(auto?'Observe → act → check → repeat':'Loop paused')},true)}if(s.scene==='architecture'){['C# / MAF','VS Code','Runtime'].forEach((v,i)=>button(v,()=>{selectedPath=i;const desc=['C# application → optional MAF orchestration → Copilot SDK → CLI runtime.','VS Code Agents Window → Agent Host → Copilot SDK adapter → runtime.','The CLI runtime executes the agent loop. The SDK exposes programmatic control over JSON-RPC.'];$('description').textContent=desc[i];targetSpin=[-.35,.25,.7][i];$('interactive').querySelectorAll('button').forEach((b,j)=>b.classList.toggle('active',j===i))}))}if(s.scene==='workflow'){button('▶ Run workflow',()=>{sim=1;simStart=performance.now();simStatus='';},true);const b=button('Check fails: OFF',()=>{fail=!fail;b.textContent='Check fails: '+(fail?'ON':'OFF');b.classList.toggle('active',fail)})}if(s.scene==='ideas'){const ds=['Review a bounded repository change against explicit architectural rules. Output findings with file-level evidence.','Fix one failing test in an isolated workspace. Stop after a bounded number of attempts and report the evidence.','Exercise one user journey in a browser. Record what failed, propose a change and verify the same journey again.'];['Repo review','Repair loop','UI test'].forEach((l,i)=>button(l,()=>{$('description').textContent=ds[i];targetSpin=(i-1)*.4}))}if(index===slides.length-1&&s.scene!=='lessons'){button('Back to the staircase ↺',()=>go(0),true);button('Open chapter map',()=>showMap())}if(!reduced)$('copy').animate([{opacity:0,transform:'translateY(12px)'},{opacity:1,transform:'translateY(0)'}],{duration:450,easing:'ease-out'});history.replaceState(null,'','#'+index)}
@@ -593,5 +743,7 @@ if(slides[index].scene==='crisis')animateCrisis(now,dt);
 if(slides[index].scene==='apollo')animateApollo(dt);
  if(slides[index].scene==='lessons')animateLessons(dt);
 if(slides[index].scene==='wardley')wardleyScene?.animate(dt);
+if(slides[index].scene==='sdkpaths')animateSdkPaths(dt);
+if(slides[index].scene==='boundaries')animateBoundaries(dt);
 if(slides[index].scene==='powerstrip')animatePowerStrip(now,dt);
 if(slides[index].scene==='harness'&&auto&&objects[0]){const a=now*.001;objects[0].position.set(Math.cos(a)*2.65,Math.sin(a)*2.05,-.4)}if(slides[index].scene==='brain'&&!reduced)objects.forEach((o,i)=>o.scale.setScalar(1+Math.sin(now*.001+i)*.1));if(slides[index].scene==='eniac'&&!reduced)objects.forEach((o,i)=>o.material.emissive.setHex(Math.sin(now*.002+i)> .8?0x443300:0));if(slides[index].scene==='workflow'&&sim){let stage=Math.floor((now-simStart)/1200);const seq=fail?[0,1,2,3,1,2,3]:[0,1,2,3];const msgs=fail?['Assigning a bounded change','Agent edits the workspace','Check failed: evidence returned','Repair requested · attempt 2 of 2','Agent applies a repair','Check passes','Accepted with evidence']:['Assigning a bounded change','Agent edits the workspace','Check passes','Accepted with evidence'];if(stage<seq.length){objects.forEach((o,i)=>o.scale.setScalar(i===seq[stage]?1.1:1));if(simStatus!==msgs[stage]){$('drawingTitle').textContent=msgs[stage];simStatus=msgs[stage]}}else{sim=0;objects.forEach(o=>o.scale.setScalar(1));$('drawingTitle').textContent='Done. Outcome checked, not merely asserted.'}}renderer.render(scene,camera)}requestAnimationFrame(frame);
