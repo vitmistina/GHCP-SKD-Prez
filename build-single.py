@@ -7,6 +7,8 @@ dithering=(p/'dithering.js').read_text(encoding='utf-8').replace('export functio
 js=js.replace("import { initDithering } from './dithering.js';",dithering)
 wardley=(p/'wardley-scene.js').read_text(encoding='utf-8').replace('export function createWardley','function createWardley',1)
 js=js.replace("import { createWardley } from './wardley-scene.js';",wardley)
+sdk_bugs=(p/'sdk-bugs-scene.js').read_text(encoding='utf-8').replace('export function createSdkBugsScene','function createSdkBugsScene',1)
+js=js.replace("import { createSdkBugsScene } from './sdk-bugs-scene.js';",sdk_bugs)
 js=js.replace("'./three.module.js'","'data:text/javascript;base64,"+base64.b64encode((p/'three.module.js').read_bytes()).decode()+"'")
 js=js.replace('assets/eniac.jpeg','data:image/jpeg;base64,'+base64.b64encode((p/'assets/eniac.jpeg').read_bytes()).decode())
 js=js.replace('assets/hamilton.jpeg','data:image/jpeg;base64,'+base64.b64encode((p/'assets/hamilton.jpeg').read_bytes()).decode())
