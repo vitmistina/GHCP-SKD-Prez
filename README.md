@@ -60,6 +60,12 @@ Immediately after the five hands-on lessons, the presentation now has two animat
 
 **Deterministic limits, stochastic work.** A precise state machine and enforceable rule-count, budget and retry limits face an exploratory agent landscape, connected through a policy gate. Toggle "Within limits" versus "Over budget" to see an allowed proposal or a rejected one. The host can bound tool calls, budgets and state transitions, but admission by policy is not proof of the agent's answer being correct. This is an illustrative simulation, not a live SDK demo.
 
+## A fast-moving SDK, with bugs
+
+Before the Wardley prediction, **Features keep arriving. So do the bugs.** shows an animated, paper-textured low-poly SDK cube with imperfect round openings. Small beetles and spiders crawl from the holes; **Ship another feature +** reveals more bugs, **Patch a hole** applies a visible bandage and hides one bug, and **Replay** restores the opening scene. This is a metaphor for rapid product evolution and testing overhead, **not** a claim that AI-written code inherently has a higher bug rate or that the SDK is still preview-only. Source: `dist/sdk-bugs-scene.js`; the offline builder inlines it.
+
+The presenter notes distinguish the SDK bindings from the shared underlying Copilot runtime. For the largely agent-written Rust rewrite and measured regressions, see [Stephen Toub’s engineering report](https://github.blog/ai-and-ml/generative-ai/migrating-the-github-copilot-runtime-to-rust-using-copilot/).
+
 ## Closing Wardley-inspired 3D map
 
 The final slide, after the five field notes, uses Three.js low-poly models on a physical four-column Wardley-inspired map. It shows the compiler and managed-memory evolution, a custom harness, the **software factory in Genesis today**, and a **red dashed prediction** toward a few mainstream products (not automatically commodities).
