@@ -6,6 +6,7 @@ on:
     paths:
       - 'dist/app.js'
       - 'dist/wardley-scene.js'
+      - 'dist/sdk-bugs-scene.js'
       - 'dist/dithering.js'
       - 'dist/style.css'
       - 'dist/index.html'
@@ -39,6 +40,7 @@ jobs:
           node --input-type=module --check < dist/app.js
           node --input-type=module --check < dist/dithering.js
           node --input-type=module --check < dist/wardley-scene.js
+          node --input-type=module --check < dist/sdk-bugs-scene.js
 
       - name: Rebuild standalone offline HTML
         run: |
@@ -70,6 +72,7 @@ jobs:
             node --input-type=module --check < dist/app.js
             node --input-type=module --check < dist/dithering.js
             node --input-type=module --check < dist/wardley-scene.js
+          node --input-type=module --check < dist/sdk-bugs-scene.js
             python3 build-single.py
           done
 
