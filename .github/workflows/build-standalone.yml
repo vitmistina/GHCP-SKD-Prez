@@ -16,7 +16,7 @@ on:
       - '.github/workflows/build-standalone.yml'
   workflow_dispatch:
 
-# Serialize rebuilds while multiple slide edits land on main.
+# Only one workflow owns dist/presentation.html. Serialize all its runs.
 concurrency:
   group: standalone-presentation-main
   cancel-in-progress: false
@@ -38,6 +38,7 @@ jobs:
         run: |
           node --input-type=module --check < dist/app.js
           node --input-type=module --check < dist/dithering.js
+          node --input-type=module --check < dist/wardley-scene.js
 
       - name: Rebuild standalone offline HTML
         run: |
@@ -46,12 +47,31 @@ jobs:
 
       - name: Commit updated HTML
         run: |
-          if ! git diff --quiet -- dist/presentation.html; then
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # A concurrent external push can still happen between build and push.
+          # Rebuild from the new head rather than pushing stale generated HTML.
+          for attempt in 1 2 3; do
+            if git diff --quiet -- dist/presentation.html; then
+              echo "Standalone HTML is already up to date."
+              exit 0
+            fi
+
             git add dist/presentation.html
             git commit -m "Build standalone HTML after scene changes [skip ci]"
-            git push origin HEAD:main
-          else
-            echo "Standalone HTML is already up to date."
-          fi
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+
+            echo "Push conflicted (attempt ${attempt}/3); rebuilding from current main."
+            git fetch origin main
+            git reset --hard origin/main
+            node --input-type=module --check < dist/app.js
+            node --input-type=module --check < dist/dithering.js
+            node --input-type=module --check < dist/wardley-scene.js
+            python3 build-single.py
+          done
+
+          echo "::error::Failed to push standalone HTML after 3 attempts."
+          exit 1
